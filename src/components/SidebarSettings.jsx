@@ -218,11 +218,9 @@ function SidebarSettings({ onOpenHelp }) {
           </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 lg:overflow-y-auto p-4 pb-20 relative space-y-5 scrollbar-hide">
-          
-          {activeTab === 'text' && (
-            <>
+        <div className="flex-1 lg:overflow-y-auto relative scrollbar-hide">
+          <div className="p-4 pb-20">
+            <div className={activeTab === 'text' ? 'space-y-5 flex flex-col' : 'hidden'}>
               {/* Text Editor Section */}
               <section>
                 <div className="flex items-center justify-between mb-2 relative">
@@ -254,92 +252,96 @@ function SidebarSettings({ onOpenHelp }) {
                   </button>
                 </div>
                 
-                <div className="border border-stone-200/50 bg-stone-50/50 rounded-xl p-3 shadow-sm relative flex flex-col gap-2">
-                  <Toolbar 
-                    editorRef={editorRef} 
-                    onUpdate={handleInput} 
-                  />
-                  <SmartMenu editorRef={editorRef} />
-                  <div 
-                    ref={editorRef}
-                    className="mt-3 min-h-[240px] max-h-[400px] overflow-y-auto outline-none whitespace-pre-wrap break-words custom-scrollbar" 
-                    contentEditable 
-                    suppressContentEditableWarning
-                    onPaste={handlePaste}
-                    onInput={handleInput}
-                    style={{ 
-                      fontFamily: state.printFont === 'ClassRoomCursive' ? "'ClassRoomCursive', 'Propisi', cursive" : state.printFont,
-                      fontSize: state.printFont === 'ClassRoomCursive' ? '28px' : '18px',
-                      lineHeight: '1.4'
-                    }}
-                  ></div>
-                </div>
-              </section>
+                <div className="border border-stone-200/50 bg-white rounded-xl shadow-sm relative flex flex-col">
+                  <div className="sticky top-0 z-10 bg-stone-50/95 backdrop-blur-sm p-3 flex flex-col gap-2 border-b border-stone-200/50 rounded-t-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                    <Toolbar 
+                      editorRef={editorRef} 
+                      onUpdate={handleInput} 
+                    />
+                    <SmartMenu editorRef={editorRef} />
+                  </div>
+                  <div className="p-3">
+                    <div 
+                      ref={editorRef}
+                      className="min-h-[240px] max-h-[400px] overflow-y-auto outline-none whitespace-pre-wrap break-words custom-scrollbar" 
+                      contentEditable 
+                      suppressContentEditableWarning
+                      onPaste={handlePaste}
+                      onInput={handleInput}
+                  style={{ 
+                    fontFamily: state.printFont === 'ClassRoomCursive' ? "'ClassRoomCursive', 'Propisi', cursive" : state.printFont,
+                    fontSize: state.printFont === 'ClassRoomCursive' ? '28px' : '18px',
+                    lineHeight: '1.4'
+                  }}
+                ></div>
+              </div>
+            </div>
+            </section>
 
-              {/* Font Section */}
-              <section>
-                <div className="text-sm font-medium text-stone-700 mb-2 uppercase tracking-wider text-xs">Шрифт</div>
-                <div className="flex items-center gap-3 bg-stone-50/50 border border-stone-200/50 rounded-xl p-3">
-                  <select 
-                    value={state.printFont}
+            {/* Font Section */}
+            <section>
+              <div className="text-sm font-medium text-stone-700 mb-2 uppercase tracking-wider text-xs">Шрифт</div>
+              <div className="flex items-center gap-3 bg-stone-50/50 border border-stone-200/50 rounded-xl p-3">
+                <select 
+                  value={state.printFont}
+                  onChange={(e) => {
+                    const newFont = e.target.value;
+                    const applied = applyInlineStyle('font', newFont);
+                    if (!applied) {
+                      const oldFont = state.printFont;
+                      updateState({ printFont: newFont });
+                      showToast('Изменен базовый шрифт.', () => updateState({ printFont: oldFont }));
+                    }
+                  }}
+                  className="flex-1 min-w-[120px] bg-white border border-stone-200 text-stone-700 text-sm rounded-lg focus:ring-brand-blue focus:border-brand-blue block p-2 outline-none"
+                >
+                  <option value="PT Sans">PT Sans</option>
+                  <option value="Inter">Inter</option>
+                  <option value="Roboto">Roboto</option>
+                  <option value="Open Sans">Open Sans</option>
+                  <option value="Arial">Arial</option>
+                  <option value="ClassRoomCursive">Рукописный</option>
+                </select>
+                <div className={`flex items-center gap-2 flex-1 transition-opacity duration-200 ${state.printFont === 'ClassRoomCursive' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                  <span className="text-[10px] text-stone-500 font-medium">Размер</span>
+                  <input 
+                    type="range" 
+                    min="2" max="100" step="0.5"
+                    value={state.printFontSize} 
                     onChange={(e) => {
-                      const newFont = e.target.value;
-                      const applied = applyInlineStyle('font', newFont);
+                      const newFs = parseFloat(e.target.value);
+                      const applied = applyInlineStyle('fs', newFs);
                       if (!applied) {
-                        const oldFont = state.printFont;
-                        updateState({ printFont: newFont });
-                        showToast('Изменен базовый шрифт.', () => updateState({ printFont: oldFont }));
+                        const oldFs = state.printFontSize;
+                        updateState({ printFontSize: newFs });
+                        showToast('Изменен базовый размер.', () => updateState({ printFontSize: oldFs }));
                       }
                     }}
-                    className="flex-1 min-w-[120px] bg-white border border-stone-200 text-stone-700 text-sm rounded-lg focus:ring-brand-blue focus:border-brand-blue block p-2 outline-none"
-                  >
-                    <option value="PT Sans">PT Sans</option>
-                    <option value="Inter">Inter</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Open Sans">Open Sans</option>
-                    <option value="Arial">Arial</option>
-                    <option value="ClassRoomCursive">Рукописный</option>
-                  </select>
-                  <div className={`flex items-center gap-2 flex-1 transition-opacity duration-200 ${state.printFont === 'ClassRoomCursive' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                    <span className="text-[10px] text-stone-500 font-medium">Размер</span>
-                    <input 
-                      type="range" 
-                      min="2" max="100" step="0.5"
-                      value={state.printFontSize} 
-                      onChange={(e) => {
-                        const newFs = parseFloat(e.target.value);
-                        const applied = applyInlineStyle('fs', newFs);
-                        if (!applied) {
-                          const oldFs = state.printFontSize;
-                          updateState({ printFontSize: newFs });
-                          showToast('Изменен базовый размер.', () => updateState({ printFontSize: oldFs }));
-                        }
-                      }}
-                      className="w-full accent-brand-blue h-1 bg-stone-200 rounded-lg appearance-none cursor-pointer"
-                    />
-                  </div>
+                    className="w-full accent-brand-blue h-1 bg-stone-200 rounded-lg appearance-none cursor-pointer"
+                  />
                 </div>
-              </section>
-            </>
-          )}
+              </div>
+            </section>
+            </div>
 
-          {activeTab === 'list' && (
-            <MemoizedOptions 
-              format={state.format}
-              orientation={state.orientation}
-              grid={state.grid}
-              mode={state.mode}
-              layout={state.layout}
-              mathMode={state.mathMode}
-              margin={state.margin}
-              mirrorMargins={state.mirrorMargins}
-              updateState={handleUpdateState}
-            />
-          )}
+            <div className={activeTab === 'list' ? 'space-y-5 flex flex-col' : 'hidden'}>
+              <MemoizedOptions 
+                format={state.format}
+                orientation={state.orientation}
+                grid={state.grid}
+                mode={state.mode}
+                layout={state.layout}
+                mathMode={state.mathMode}
+                margin={state.margin}
+                mirrorMargins={state.mirrorMargins}
+                updateState={handleUpdateState}
+              />
+            </div>
 
-          {activeTab === 'insert' && (
-            <InsertOptions />
-          )}
+            <div className={activeTab === 'insert' ? 'space-y-5 flex flex-col' : 'hidden'}>
+              <InsertOptions />
+            </div>
+          </div>
         </div>
 
         {/* Footer Actions */}
