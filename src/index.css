@@ -2,8 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Open+Sans:wght@400;700&family=PT+Sans:wght@400;700&family=Roboto:wght@400;700&display=swap');
-
+@font-face {
+    font-family: 'Bahnschrift';
+    src: url('/Bahnschrift.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
 
 @font-face {
     font-family: 'Propisi';

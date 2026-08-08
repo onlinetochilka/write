@@ -102,14 +102,17 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
     let baseWeight = chunkObj?.bold ? 'bold' : 'normal';
     let digitWeight = chunkObj?.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
 
+    let measureBaseWeight = isCursive ? 'normal' : baseWeight;
+    let measureDigitWeight = isCursive ? 'normal' : digitWeight;
+
     const parts = textStr.split(/(\d+)/g);
     for (const part of parts) {
       if (!part) continue;
       if (/\d+/.test(part)) {
-         const fontStr = `${digitWeight} ${r(digitFs)}px ${canvasDigitFamily}`;
+         const fontStr = `${measureDigitWeight} ${r(digitFs)}px ${canvasDigitFamily}`;
          w += getMeasuredWidth('.' + part + '.', fontStr) - getMeasuredWidth('..', fontStr);
       } else {
-         const fontStr = `${baseWeight} ${r(baseFontSize)}px ${canvasFont}`;
+         const fontStr = `${measureBaseWeight} ${r(baseFontSize)}px ${canvasFont}`;
          w += getMeasuredWidth('.' + part + '.', fontStr) - getMeasuredWidth('..', fontStr);
       }
     }
@@ -279,14 +282,17 @@ function renderNormalLines(W, H, cfg, margin, gridType, textLines, fill, topOffs
         let canvasDigitFamily = isCursive ? "'ClassRoomCursive', cursive" : `'${chunkFont}', sans-serif`;
         let baseWeight = chunkObj.bold ? 'bold' : 'normal';
         let digitWeight = chunkObj.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
+        
+        let measureBaseWeight = isCursive ? 'normal' : baseWeight;
+        let measureDigitWeight = isCursive ? 'normal' : digitWeight;
 
         const parts = textStr.split(/(\d+)/g);
         for (const part of parts) {
           if (!part) continue;
           if (/\d+/.test(part)) {
-             totalW += getMeasuredWidth(part, `${digitWeight} ${r(digitFs)}px ${canvasDigitFamily}`);
+             totalW += getMeasuredWidth(part, `${measureDigitWeight} ${r(digitFs)}px ${canvasDigitFamily}`);
           } else {
-             const fontStr = `${baseWeight} ${r(fontSz)}px ${canvasFont}`;
+             const fontStr = `${measureBaseWeight} ${r(fontSz)}px ${canvasFont}`;
              totalW += getMeasuredWidth('.' + part + '.', fontStr) - getMeasuredWidth('..', fontStr);
           }
         }

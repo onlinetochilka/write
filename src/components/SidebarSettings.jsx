@@ -268,30 +268,10 @@ function SidebarSettings({ onOpenHelp }) {
 
             {/* Font Section */}
             <section className="flex-shrink-0">
-              <div className="text-sm font-medium text-stone-700 mb-2 uppercase tracking-wider text-xs">Шрифт</div>
-              <div className="flex items-center gap-3 bg-stone-50/50 border border-stone-200/50 rounded-xl p-3">
-                <select 
-                  value={state.printFont}
-                  onChange={(e) => {
-                    const newFont = e.target.value;
-                    const applied = applyInlineStyle('font', newFont);
-                    if (!applied) {
-                      const oldFont = state.printFont;
-                      updateState({ printFont: newFont });
-                      showToast('Изменен базовый шрифт.', () => updateState({ printFont: oldFont }));
-                    }
-                  }}
-                  className="flex-1 min-w-[120px] bg-white border border-stone-200 text-stone-700 text-sm rounded-lg focus:ring-brand-blue focus:border-brand-blue block p-2 outline-none"
-                >
-                  <option value="PT Sans">PT Sans</option>
-                  <option value="Inter">Inter</option>
-                  <option value="Roboto">Roboto</option>
-                  <option value="Open Sans">Open Sans</option>
-                  <option value="Arial">Arial</option>
-                  <option value="ClassRoomCursive">Рукописный</option>
-                </select>
-                <div className={`flex items-center gap-2 flex-1 transition-opacity duration-200 ${state.printFont === 'ClassRoomCursive' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                  <span className="text-[10px] text-stone-500 font-medium">Размер</span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm font-medium text-stone-700 uppercase tracking-wider text-xs">Шрифт</div>
+                
+                <div className={`flex items-center gap-2 w-1/2 transition-opacity duration-200 ${state.printFont === 'ClassRoomCursive' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                   <input 
                     type="range" 
                     min="2" max="100" step="0.5"
@@ -305,9 +285,41 @@ function SidebarSettings({ onOpenHelp }) {
                         showToast('Изменен базовый размер.', () => updateState({ printFontSize: oldFs }));
                       }
                     }}
-                    className="w-full accent-brand-blue h-1 bg-stone-200 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 accent-brand-blue h-1 bg-stone-200 rounded-lg appearance-none cursor-pointer"
                   />
+                  <span className="text-[10px] text-stone-500 font-medium w-4 text-right">{state.printFontSize}</span>
                 </div>
+              </div>
+              
+              <div className="flex bg-stone-100/80 p-1 rounded-xl shadow-sm border border-stone-200/50">
+                  <button 
+                    onClick={() => {
+                      const newFont = 'ClassRoomCursive';
+                      const applied = applyInlineStyle('font', newFont);
+                      if (!applied) {
+                        const oldFont = state.printFont;
+                        updateState({ printFont: newFont });
+                        showToast('Изменен базовый шрифт.', () => updateState({ printFont: oldFont }));
+                      }
+                    }}
+                    className={`flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-all ${state.printFont === 'ClassRoomCursive' ? 'bg-white text-brand-blue shadow-sm ring-1 ring-stone-200' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-200/50'}`}
+                  >
+                    Рукописный
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const newFont = 'Bahnschrift';
+                      const applied = applyInlineStyle('font', newFont);
+                      if (!applied) {
+                        const oldFont = state.printFont;
+                        updateState({ printFont: newFont });
+                        showToast('Изменен базовый шрифт.', () => updateState({ printFont: oldFont }));
+                      }
+                    }}
+                    className={`flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-all ${state.printFont !== 'ClassRoomCursive' ? 'bg-white text-brand-blue shadow-sm ring-1 ring-stone-200' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-200/50'}`}
+                  >
+                    Печатный
+                  </button>
               </div>
             </section>
             </div>
