@@ -106,9 +106,11 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
     for (const part of parts) {
       if (!part) continue;
       if (/\d+/.test(part)) {
-         w += getMeasuredWidth(part, `${digitWeight} ${r(digitFs)}px ${canvasDigitFamily}`);
+         const fontStr = `${digitWeight} ${r(digitFs)}px ${canvasDigitFamily}`;
+         w += getMeasuredWidth('.' + part + '.', fontStr) - getMeasuredWidth('..', fontStr);
       } else {
-         w += getMeasuredWidth(part.replace(/ /g, '\u00A0'), `${baseWeight} ${r(baseFontSize)}px ${canvasFont}`);
+         const fontStr = `${baseWeight} ${r(baseFontSize)}px ${canvasFont}`;
+         w += getMeasuredWidth('.' + part + '.', fontStr) - getMeasuredWidth('..', fontStr);
       }
     }
     return w;
@@ -284,7 +286,8 @@ function renderNormalLines(W, H, cfg, margin, gridType, textLines, fill, topOffs
           if (/\d+/.test(part)) {
              totalW += getMeasuredWidth(part, `${digitWeight} ${r(digitFs)}px ${canvasDigitFamily}`);
           } else {
-             totalW += getMeasuredWidth(part.replace(/ /g, '\u00A0'), `${baseWeight} ${r(fontSz)}px ${canvasFont}`);
+             const fontStr = `${baseWeight} ${r(fontSz)}px ${canvasFont}`;
+             totalW += getMeasuredWidth('.' + part + '.', fontStr) - getMeasuredWidth('..', fontStr);
           }
         }
       });
@@ -409,7 +412,8 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
         });
 
         const canvasFont = isCursive ? "'ClassRoomCursive', cursive" : `'${chunkFont}', sans-serif`;
-        const wText = getMeasuredWidth(chStr.replace(/ /g, '\u00A0'), `${weight} ${r(digitFs)}px ${canvasFont}`);
+        const fontStr = `${weight} ${r(digitFs)}px ${canvasFont}`;
+        const wText = getMeasuredWidth('.' + chStr + '.', fontStr) - getMeasuredWidth('..', fontStr);
         allElements.push(...getDecorations(chunkObj, cx - wText/2, rowY, wText, fontSize, lineH, fill, `mdec${lIdx}_${col}`));
 
         col++;
