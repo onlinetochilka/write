@@ -683,6 +683,136 @@ const ShapesLayer = ({ W, H, svgRef }) => {
           />
         </g>
       );
+    } else if (shape.type === 'image') {
+      element = (
+        <g>
+          {shape.src ? (
+            <image 
+              href={shape.src} 
+              x="0" 
+              y="0" 
+              width={shape.width} 
+              height={shape.height}
+              preserveAspectRatio="none"
+              style={{ mixBlendMode: shape.removeWhite ? 'multiply' : 'normal' }}
+            />
+          ) : (
+            <rect 
+              width={shape.width} 
+              height={shape.height} 
+              fill="#f3f4f6" 
+              stroke="#d1d5db" 
+              strokeWidth="1" 
+              strokeDasharray="4 4"
+            />
+          )}
+        </g>
+      );
+    } else if (shape.type === 'table') {
+      const rows = shape.rows || 3;
+      const cols = shape.cols || 3;
+      const cellWidth = shape.width / cols;
+      const cellHeight = shape.height / rows;
+      
+      const gridLines = [];
+      
+      // Horizontal lines
+      for (let i = 0; i <= rows; i++) {
+        gridLines.push(
+          <line 
+            key={`h-${i}`} 
+            x1={0} y1={i * cellHeight} 
+            x2={shape.width} y2={i * cellHeight} 
+            stroke={strokeColor} 
+            strokeWidth={strokeWidth} 
+          />
+        );
+      }
+      
+      // Vertical lines
+      for (let i = 0; i <= cols; i++) {
+        gridLines.push(
+          <line 
+            key={`v-${i}`} 
+            x1={i * cellWidth} y1={0} 
+            x2={i * cellWidth} y2={shape.height} 
+            stroke={strokeColor} 
+            strokeWidth={strokeWidth} 
+          />
+        );
+      }
+
+      element = (
+        <g>
+          <rect 
+            width={shape.width} 
+            height={shape.height} 
+            fill={fillColor} 
+            stroke="none"
+          />
+          {gridLines}
+          <foreignObject x="0" y="0" width={shape.width} height={shape.height}>
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+              {Array.from({ length: rows * cols }).map((_, i) => {
+                const r = Math.floor(i / cols);
+                const c = i % cols;
+                const cellId = `${r}-${c}`;
+                return (
+                  <div key={cellId} style={{ width: cellWidth, height: cellHeight, position: 'absolute', left: c * cellWidth, top: r * cellHeight }}>
+                    <input 
+                      type="text"
+                      value={shape.cells?.[cellId] || ''}
+                      onPointerDown={e => e.stopPropagation()}
+                      onChange={e => {
+                        const newCells = { ...(shape.cells || {}), [cellId]: e.target.value };
+                        updateState({ shapes: shapes.map(s => s.id === shape.id ? { ...s, cells: newCells } : s) });
+                      }}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        background: 'transparent',
+                        border: 'none',
+                        outline: 'none',
+                        textAlign: 'center',
+                        fontSize: '12px',
+                        color: '#000000',
+                        fontFamily: 'inherit'
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </foreignObject>
+        </g>
+      );
+    } else if (shape.type === 'text_box') {
+      element = (
+        <g>
+          <foreignObject x="0" y="0" width={shape.width} height={shape.height}>
+            <div 
+              style={{
+                width: '100%',
+                height: '100%',
+                fontSize: `${shape.fontSize || 12}px`,
+                color: shape.textColor || '#000000',
+                textAlign: shape.align || 'left',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-start',
+                fontFamily: 'inherit',
+                wordWrap: 'break-word',
+                whiteSpace: 'pre-wrap',
+                background: fillColor === 'transparent' ? 'transparent' : fillColor,
+                border: strokeColor === 'transparent' ? 'none' : `${strokeWidth}px solid ${strokeColor}`,
+                boxSizing: 'border-box'
+              }}
+            >
+              {shape.text || 'Текст'}
+            </div>
+          </foreignObject>
+        </g>
+      );
     }
     
     // Parse labels

@@ -17,13 +17,27 @@ const InsertOptions = () => {
       type,
       x: 100,
       y: 100,
-      width: 100,
-      height: ['triangle', 'rectangle', 'parallelogram', 'trapezoid', 'circle', 'ellipse'].includes(type) ? 100 : 0,
+      width: type === 'text_box' ? 80 : 100,
+      height: ['triangle', 'rectangle', 'parallelogram', 'trapezoid', 'circle', 'ellipse', 'image'].includes(type) ? 100 : (type === 'table' ? 60 : (type === 'text_box' ? 20 : 0)),
       rotation: 0,
-      stroke: '#10b981',
-      strokeWidth: 0.2,
+      stroke: (type === 'image' || type === 'text_box') ? 'transparent' : '#10b981',
+      strokeWidth: type === 'table' ? 0.3 : 0.2,
       fill: 'transparent'
     };
+
+    if (type === 'text_box') {
+      newShape.text = 'Текст';
+      newShape.fontSize = 12;
+      newShape.align = 'left';
+      newShape.textColor = '#000000';
+    } else if (type === 'table') {
+      newShape.rows = 3;
+      newShape.cols = 3;
+    } else if (type === 'image') {
+      newShape.preserveRatio = true;
+      newShape.removeWhite = false;
+      newShape.src = '';
+    }
     
     updateState({ 
       shapes: [...shapes, newShape],
@@ -56,7 +70,10 @@ const InsertOptions = () => {
                 circle: 'Окружность',
                 ellipse: 'Эллипс',
                 parallelogram: 'Параллелограмм',
-                trapezoid: 'Трапеция'
+                trapezoid: 'Трапеция',
+                text_box: 'Текстовое поле',
+                image: 'Картинка',
+                table: 'Таблица'
               }[selectedShape.type] || 'Фигура'
             }
           </h2>
@@ -68,7 +85,9 @@ const InsertOptions = () => {
           </button>
         </div>
 
-        <div className={`grid ${['line', 'segment', 'ray', 'coord_ray', 'coord_line', 'dashed_segment'].includes(selectedShape.type) ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
+        {selectedShape.type !== 'image' && selectedShape.type !== 'text_box' && (
+          <>
+            <div className={`grid ${['line', 'segment', 'ray', 'coord_ray', 'coord_line', 'dashed_segment'].includes(selectedShape.type) ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
           <div>
             <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Цвет контура</div>
             <div className="flex items-center gap-3">
@@ -151,25 +170,235 @@ const InsertOptions = () => {
             </div>
           </div>
         </div>
+        </>
+        )}
 
-        <div>
-          <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Метки вершин</div>
-          <input 
-            type="text" 
-            placeholder="Например: АБВ" 
-            className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
-            value={selectedShape.labels || ''}
-            onChange={(e) => {
-              const updated = shapes.map(s => s.id === selectedShape.id ? { ...s, labels: e.target.value } : s);
-              updateState({ shapes: updated });
-            }}
-          />
-          <div className="text-[10px] text-stone-400 mt-1">
-            Вершины подписываются по часовой стрелке.
+        {selectedShape.type !== 'image' && selectedShape.type !== 'text_box' && selectedShape.type !== 'table' && (
+          <div>
+            <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Метки вершин</div>
+            <input 
+              type="text" 
+              placeholder="Например: АБВ" 
+              className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
+              value={selectedShape.labels || ''}
+              onChange={(e) => {
+                const updated = shapes.map(s => s.id === selectedShape.id ? { ...s, labels: e.target.value } : s);
+                updateState({ shapes: updated });
+              }}
+            />
+            <div className="text-[10px] text-stone-400 mt-1">
+              Вершины подписываются по часовой стрелке.
+            </div>
           </div>
-        </div>
+        )}
 
-        {selectedShape.type !== 'triangle' && selectedShape.type !== 'rectangle' && selectedShape.type !== 'parallelogram' && selectedShape.type !== 'trapezoid' && selectedShape.type !== 'circle' && (
+        {selectedShape.type === 'image' && (
+          <div className="space-y-4 pt-2">
+            <div>
+              <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Файл изображения</div>
+              <input 
+                type="file" 
+                accept="image/png, image/jpeg"
+                className="w-full text-xs text-stone-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-brand-blue/10 file:text-brand-blue hover:file:bg-brand-blue/20"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      // Get image dimensions to set proportional height
+                      const img = new Image();
+                      img.onload = () => {
+                        const ratio = img.height / img.width;
+                        const w = selectedShape.width || 100;
+                        updateState({ 
+                          shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, src: event.target.result, height: w * ratio } : s) 
+                        });
+                      };
+                      img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Ширина (мм)</div>
+                <input 
+                  type="number" min="5" max="300"
+                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
+                  value={Math.round(selectedShape.width)}
+                  onChange={(e) => {
+                    const w = parseFloat(e.target.value) || 10;
+                    if (selectedShape.preserveRatio && selectedShape.width && selectedShape.height) {
+                      const ratio = selectedShape.height / selectedShape.width;
+                      updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, width: w, height: w * ratio } : s) });
+                    } else {
+                      updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, width: w } : s) });
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Высота (мм)</div>
+                <input 
+                  type="number" min="5" max="300"
+                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
+                  value={Math.round(selectedShape.height || 0)}
+                  onChange={(e) => {
+                    const h = parseFloat(e.target.value) || 10;
+                    if (selectedShape.preserveRatio && selectedShape.width && selectedShape.height) {
+                      const ratio = selectedShape.width / selectedShape.height;
+                      updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, height: h, width: h * ratio } : s) });
+                    } else {
+                      updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, height: h } : s) });
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <div className="space-y-2 pt-2 border-t border-stone-100">
+              <label className="flex items-center gap-2 text-xs text-stone-600 cursor-pointer">
+                <input 
+                  type="checkbox"
+                  checked={selectedShape.preserveRatio !== false}
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, preserveRatio: e.target.checked } : s) })}
+                  className="rounded border-stone-300 text-brand-blue focus:ring-brand-blue"
+                />
+                Сохранять пропорции
+              </label>
+              <label className="flex items-center gap-2 text-xs text-stone-600 cursor-pointer">
+                <input 
+                  type="checkbox"
+                  checked={selectedShape.removeWhite || false}
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, removeWhite: e.target.checked } : s) })}
+                  className="rounded border-stone-300 text-brand-blue focus:ring-brand-blue"
+                />
+                Убрать белый фон
+              </label>
+              {selectedShape.removeWhite && (
+                <div className="text-[9px] text-stone-400 pl-6 leading-tight">
+                  Делает прозрачным только чисто белый цвет. Идеально для графиков и формул. Не удаляет клетчатый фон "ложной прозрачности".
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {selectedShape.type === 'table' && (
+          <div className="space-y-4 pt-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Строки</div>
+                <input 
+                  type="number" min="1" max="20"
+                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
+                  value={selectedShape.rows || 3}
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, rows: parseInt(e.target.value) || 1 } : s) })}
+                />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Столбцы</div>
+                <input 
+                  type="number" min="1" max="20"
+                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
+                  value={selectedShape.cols || 3}
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, cols: parseInt(e.target.value) || 1 } : s) })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-stone-100">
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Ширина (мм)</div>
+                <input 
+                  type="number" min="5" max="300"
+                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
+                  value={Math.round(selectedShape.width)}
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, width: parseFloat(e.target.value) || 10 } : s) })}
+                />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Высота (мм)</div>
+                <input 
+                  type="number" min="5" max="300"
+                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
+                  value={Math.round(selectedShape.height || 0)}
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, height: parseFloat(e.target.value) || 10 } : s) })}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedShape.type === 'text_box' && (
+          <div className="space-y-4 pt-2">
+            <div>
+              <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Текст</div>
+              <textarea 
+                className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none resize-none"
+                rows="3"
+                value={selectedShape.text || ''}
+                onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, text: e.target.value } : s) })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Цвет</div>
+                <input 
+                  type="color" 
+                  value={selectedShape.textColor || '#000000'}
+                  className="w-8 h-8 p-0 border-0 rounded cursor-pointer overflow-hidden"
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, textColor: e.target.value } : s) })}
+                />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Размер шрифта</div>
+                <input 
+                  type="number" min="5" max="72"
+                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
+                  value={selectedShape.fontSize || 12}
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, fontSize: parseFloat(e.target.value) || 12 } : s) })}
+                />
+              </div>
+            </div>
+            <div className="pt-2 border-t border-stone-100">
+              <div className="text-[10px] font-bold text-stone-500 mb-2 uppercase">Выравнивание</div>
+              <div className="flex bg-stone-100 rounded-lg p-1">
+                {['left', 'center', 'right'].map(align => (
+                  <button
+                    key={align}
+                    className={`flex-1 py-1 text-xs font-medium rounded-md transition-all ${selectedShape.align === align ? 'bg-white text-brand-blue shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+                    onClick={() => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, align } : s) })}
+                  >
+                    {align === 'left' ? 'Влево' : align === 'center' ? 'Центр' : 'Вправо'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-stone-100">
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Ширина (мм)</div>
+                <input 
+                  type="number" min="10" max="300"
+                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
+                  value={Math.round(selectedShape.width)}
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, width: parseFloat(e.target.value) || 10 } : s) })}
+                />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Высота (мм)</div>
+                <input 
+                  type="number" min="5" max="300"
+                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
+                  value={Math.round(selectedShape.height || 0)}
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, height: parseFloat(e.target.value) || 10 } : s) })}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedShape.type !== 'triangle' && selectedShape.type !== 'rectangle' && selectedShape.type !== 'parallelogram' && selectedShape.type !== 'trapezoid' && selectedShape.type !== 'circle' && selectedShape.type !== 'image' && selectedShape.type !== 'table' && selectedShape.type !== 'text_box' && (
           <div className="grid grid-cols-2 gap-4">
             <div>
               <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Ширина (мм)</div>
@@ -1065,8 +1294,32 @@ const InsertOptions = () => {
 
   return (
     <section className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-200">
+      <div className="text-[11px] font-bold text-stone-500 mb-2 uppercase tracking-wider">Объекты</div>
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
+          onClick={() => addShape('text_box')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          Текст
+        </button>
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
+          onClick={() => addShape('image')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Картинка
+        </button>
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700 col-span-2"
+          onClick={() => addShape('table')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/><line x1="15" y1="9" x2="15" y2="21"/></svg>
+          Таблица
+        </button>
+      </div>
+
       <div className="text-[11px] font-bold text-stone-500 mb-2 uppercase tracking-wider">Фигуры</div>
-      
       <div className="grid grid-cols-2 gap-2">
         <button 
           className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"

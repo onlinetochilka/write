@@ -1,4 +1,4 @@
-import React, { memo, useRef } from 'react';
+import React, { memo, useRef, useEffect } from 'react';
 import { useStore } from '../Store';
 import { PAPER_DIMS } from '../utils/constants';
 import { buildGridGroup } from '../utils/svgGrid';
@@ -14,9 +14,75 @@ const MemoizedText = memo(({ W, H, grid, mode, mathMode, margin, textLines, prin
 });
 
 function PreviewSheet() {
-  const { state } = useStore();
-  const { format, orientation, grid, mode, layout, mathMode, margin, mirrorMargins, textLines, printFont, printFontSize } = state;
+  const { state, updateState } = useStore();
+  const { format, orientation, grid, mode, layout, mathMode, margin, mirrorMargins, textLines, printFont, printFontSize, shapes } = state;
   const svgRef = useRef(null);
+
+  useEffect(() => {
+    const handlePaste = (e) => {
+      const text = e.clipboardData?.getData('text/plain');
+      if (!text) return;
+      
+      const isTableData = text.includes('\t') || text.includes('\n');
+      
+      // Check if user is typing in an input
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+        if (isTableData && text.split('\n').length > 1 && text.includes('\t')) {
+          e.preventDefault();
+          alert('Внимание: Вы пытаетесь вставить целую таблицу внутрь одной ячейки.\n\nДля создания новой таблицы кликните по пустому месту на листе, чтобы снять выделение с текстового поля, и нажмите Ctrl+V еще раз.');
+        }
+        return;
+      }
+      
+      // If we are here, we are pasting onto the canvas
+      if (text.includes('\t')) {
+        e.preventDefault();
+        
+        let rowsData = text.trim().split('\n');
+        // Apply limit
+        if (rowsData.length > 20) rowsData = rowsData.slice(0, 20);
+        
+        let maxCols = 0;
+        const parsedCells = {};
+        
+        rowsData.forEach((rowLine, r) => {
+          let colsData = rowLine.split('\t');
+          if (colsData.length > 10) colsData = colsData.slice(0, 10);
+          maxCols = Math.max(maxCols, colsData.length);
+          
+          colsData.forEach((cellText, c) => {
+            if (cellText.trim()) {
+              parsedCells[`${r}-${c}`] = cellText.trim();
+            }
+          });
+        });
+        
+        if (maxCols > 0) {
+          const newShape = {
+            id: Date.now().toString(),
+            type: 'table',
+            x: 50, // default position
+            y: 50,
+            width: maxCols * 25,
+            height: rowsData.length * 10,
+            rows: rowsData.length,
+            cols: maxCols,
+            cells: parsedCells,
+            strokeColor: '#000000',
+            strokeWidth: 0.5,
+            fillColor: 'transparent',
+            textColor: '#000000',
+            fontSize: 12
+          };
+          
+          updateState({ shapes: [...shapes, newShape], selectedShapeId: newShape.id });
+        }
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [shapes, updateState]);
 
   const b = PAPER_DIMS[format] || PAPER_DIMS.a4;
   const W = orientation === 'landscape' ? b.h : b.w;
