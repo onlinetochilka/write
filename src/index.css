@@ -111,10 +111,7 @@
 }
 
 @media print {
-  @page {
-    margin: 0;
-  }
-  
+
   html, body, #root, #root > div {
     width: 100% !important;
     height: 100% !important;

@@ -133,7 +133,7 @@ function PreviewSheet() {
 
   return (
     <main className="preview-wrap max-lg:min-h-[85vh]">
-      <style>{`@page { margin: 0; }`}</style>
+      <style>{`@page { size: ${displayW}mm ${H}mm; margin: 0; }`}</style>
       <div 
         id="previewSheet"
         className="a4-sheet print-page relative"
