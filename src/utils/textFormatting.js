@@ -92,6 +92,13 @@ export const applyStyleToSelection = (editorRef, type, value, onUpdate) => {
     targetSpan.innerHTML = targetSpan.innerHTML.replace(/<\/?span[^>]*>/g, '');
   }
   
+  try {
+    sel.removeAllRanges();
+    const newRange = document.createRange();
+    newRange.selectNodeContents(targetSpan);
+    sel.addRange(newRange);
+  } catch(e) {}
+  
   if (onUpdate) onUpdate();
   return true;
 };

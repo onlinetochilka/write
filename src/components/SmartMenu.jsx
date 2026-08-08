@@ -124,6 +124,13 @@ function SmartMenu({ editorRef }) {
         });
         targetSpan.appendChild(fragment);
         range.insertNode(targetSpan);
+        
+        try {
+            sel.removeAllRanges();
+            const newRange = document.createRange();
+            newRange.selectNodeContents(targetSpan);
+            sel.addRange(newRange);
+        } catch(e) {}
     } catch (e) {
         return;
     }
