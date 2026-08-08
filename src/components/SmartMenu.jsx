@@ -116,21 +116,23 @@ function SmartMenu({ editorRef }) {
   };
 
   return (
-    <div className="flex items-center gap-1 bg-stone-100 rounded-lg p-1 border border-stone-200">
+    <div className="flex items-center gap-1">
       <div className="flex items-center gap-0.5">
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'solid')} className="w-8 h-8 rounded-lg bg-stone-50 text-stone-500 hover:text-stone-800 hover:bg-white flex items-center justify-center font-bold text-xs transition-colors"><span className="border-b-2 border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'double')} className="w-8 h-8 rounded-lg bg-stone-50 text-stone-500 hover:text-stone-800 hover:bg-white flex items-center justify-center font-bold text-xs transition-colors"><span className="border-b border-current pb-0.5 shadow-[0_3px_0_0_currentColor]">&nbsp;&nbsp;&nbsp;</span></button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'dashed')} className="w-8 h-8 rounded-lg bg-stone-50 text-stone-500 hover:text-stone-800 hover:bg-white flex items-center justify-center font-bold text-xs transition-colors"><span className="border-b-2 border-dashed border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'dotdash')} className="w-8 h-8 rounded-lg bg-stone-50 text-stone-500 hover:text-stone-800 hover:bg-white flex items-center justify-center font-bold text-xs transition-colors"><span className="border-b-2 border-dotted border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'wavy')} className="w-8 h-8 rounded-lg bg-stone-50 text-stone-500 hover:text-stone-800 hover:bg-white flex items-center justify-center font-bold text-xs transition-colors"><span className="underline decoration-wavy underline-offset-2 decoration-[1.5px] pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'solid')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-bold text-xs" title="Сплошное подчеркивание"><span className="border-b-2 border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'double')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-bold text-xs" title="Двойное подчеркивание"><span className="border-b border-current pb-0.5 shadow-[0_3px_0_0_currentColor]">&nbsp;&nbsp;&nbsp;</span></button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'dashed')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-bold text-xs" title="Штриховое подчеркивание"><span className="border-b-2 border-dashed border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'dotdash')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-bold text-xs" title="Штрих-пунктирное подчеркивание"><span className="border-b-2 border-dotted border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'wavy')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-bold text-xs" title="Волнистое подчеркивание"><span className="underline decoration-wavy underline-offset-2 decoration-[1.5px] pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
       </div>
-      <div className="w-[1px] h-5 bg-stone-300 mx-1"></div>
+      
+      <div className="w-px h-5 bg-stone-200 mx-1"></div>
+      
       <div className="flex items-center gap-0.5">
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'prefix')} className="w-8 h-8 rounded-lg bg-stone-50 text-stone-500 hover:text-stone-800 hover:bg-white flex items-center justify-center font-medium font-serif text-sm transition-colors">¬</button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'root')} className="w-8 h-8 rounded-lg bg-stone-50 text-stone-500 hover:text-stone-800 hover:bg-white flex items-center justify-center font-medium font-serif text-sm transition-colors">⌒</button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'suffix')} className="w-8 h-8 rounded-lg bg-stone-50 text-stone-500 hover:text-stone-800 hover:bg-white flex items-center justify-center font-medium font-serif text-sm transition-colors">^</button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'ending')} className="w-8 h-8 rounded-lg bg-stone-50 text-stone-500 hover:text-stone-800 hover:bg-white flex items-center justify-center font-medium font-serif text-sm transition-colors">□</button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('base', 'toggle')} className="w-8 h-8 rounded-lg bg-stone-50 text-stone-500 hover:text-stone-800 hover:bg-white flex items-center justify-center font-medium font-serif text-sm transition-colors">_</button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'prefix')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-medium font-serif text-sm" title="Приставка">¬</button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'root')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-medium font-serif text-sm" title="Корень">⌒</button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'suffix')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-medium font-serif text-sm" title="Суффикс">^</button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'ending')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-medium font-serif text-sm" title="Окончание">□</button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('base', 'toggle')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-medium font-serif text-sm" title="Основа">_</button>
       </div>
     </div>
   );
