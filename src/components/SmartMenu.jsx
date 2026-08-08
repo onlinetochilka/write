@@ -6,6 +6,22 @@ import { trackGoal } from '../utils/analytics';
 function SmartMenu({ editorRef }) {
   const { updateState } = useStore(() => null);
 
+  const addAccent = () => {
+    trackGoal('accent_clicked');
+    const sel = window.getSelection();
+    if (!sel.rangeCount || !editorRef.current) return;
+    const range = sel.getRangeAt(0);
+    if (!editorRef.current.contains(range.commonAncestorContainer)) return;
+    
+    const textNode = document.createTextNode('´');
+    range.insertNode(textNode);
+    range.setStartAfter(textNode);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    updateState({ textLines: getTextLines(editorRef.current) });
+  };
+
   const applyStyle = (type, value) => {
     const sel = window.getSelection();
     if (!sel.rangeCount || sel.isCollapsed) return;
@@ -134,6 +150,10 @@ function SmartMenu({ editorRef }) {
         <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'ending')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-medium font-serif text-sm" title="Окончание">□</button>
         <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('base', 'toggle')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-medium font-serif text-sm" title="Основа">_</button>
       </div>
+
+      <div className="w-px h-5 bg-stone-200 mx-1 ml-auto"></div>
+      
+      <button onMouseDown={(e) => e.preventDefault()} onClick={addAccent} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 text-sm font-medium">´</button>
     </div>
   );
 }

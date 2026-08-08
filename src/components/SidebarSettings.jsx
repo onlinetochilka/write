@@ -223,11 +223,9 @@ function SidebarSettings({ onOpenHelp }) {
             <div className={activeTab === 'text' ? 'space-y-5 flex flex-col' : 'hidden'}>
               {/* Text Editor Section */}
               <section>
-                <div className="flex items-center justify-between mb-2 relative">
-                  <div className="text-sm font-medium text-stone-700">Текст для прописей</div>
-                  
+                <div className="relative">
                   {toast && (
-                    <div className="absolute top-0 right-0 left-0 -mt-1 bg-blue-50 border border-brand-blue/30 text-brand-blue rounded-lg p-2 text-xs flex items-center justify-between shadow-sm animate-fade-in z-20 backdrop-blur-sm bg-blue-50/95">
+                    <div className="absolute top-0 right-0 left-0 -mt-1 bg-blue-50 border border-brand-blue/30 text-brand-blue rounded-lg p-2 text-xs flex items-center justify-between shadow-sm animate-fade-in z-50 backdrop-blur-sm bg-blue-50/95 mb-2">
                       <span className="flex-1 pr-2 truncate">{toast.message}</span>
                       <button 
                         onClick={() => { toast.onUndo(); setToast(null); }}
@@ -237,26 +235,14 @@ function SidebarSettings({ onOpenHelp }) {
                       </button>
                     </div>
                   )}
-
-                  <button 
-                    onMouseDown={(e) => e.preventDefault()} 
-                    onClick={clearText} 
-                    title="Очистить форматирование"
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 transition-colors"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
-                      <line x1="18" y1="9" x2="12" y2="15"></line>
-                      <line x1="12" y1="9" x2="18" y2="15"></line>
-                    </svg>
-                  </button>
                 </div>
                 
-                <div className="border border-stone-200/50 bg-white rounded-xl shadow-sm relative flex flex-col">
+                <div className="border border-stone-200/50 bg-white rounded-xl shadow-sm relative flex flex-col mt-2">
                   <div className="sticky top-0 z-10 bg-stone-50/95 backdrop-blur-sm p-3 flex flex-col gap-2 border-b border-stone-200/50 rounded-t-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                     <Toolbar 
                       editorRef={editorRef} 
                       onUpdate={handleInput} 
+                      onClear={clearText}
                     />
                     <SmartMenu editorRef={editorRef} />
                   </div>
