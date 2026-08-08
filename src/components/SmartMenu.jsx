@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../Store';
 import { getTextLines } from '../utils/textParser';
+import { trackGoal } from '../utils/analytics';
 
 function SmartMenu({ editorRef }) {
   const { updateState } = useStore();
@@ -40,6 +41,9 @@ function SmartMenu({ editorRef }) {
     if (left < 10) left = 10;
     
     setPos({ top, left });
+    if (!visible) {
+      trackGoal('smart_menu_used');
+    }
     setVisible(true);
   };
 

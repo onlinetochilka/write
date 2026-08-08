@@ -1,4 +1,5 @@
 import React from 'react';
+import { trackGoal } from '../utils/analytics';
 
 const PROMO_APPS = [
   { app_name: 'handwriting_generator', label: 'Генератор прописей' },
@@ -35,10 +36,10 @@ function GlassDrawer({ isOpen, onClose, onToggle }) {
             if (i === 6) {
               return (
                 <React.Fragment key="all">
-                  <button onClick={() => window.open('https://onlinetochilka.github.io/', '_blank')} className="w-full text-left p-3 rounded-xl bg-brand-burgundy text-white font-semibold shadow-sm hover:-translate-y-0.5 transition-transform">
+                  <button onClick={() => { trackGoal('crosspromo_clicked', { app_name: 'all_services' }); window.open('https://onlinetochilka.github.io/', '_blank'); }} className="w-full text-left p-3 rounded-xl bg-brand-burgundy text-white font-semibold shadow-sm hover:-translate-y-0.5 transition-transform">
                     Все приложения Точилки
                   </button>
-                  <button onClick={() => window.open(`https://onlinetochilka.github.io/${app.app_name}/`, '_blank')} className="w-full text-left p-3 rounded-xl bg-white/50 hover:bg-white text-stone-700 shadow-sm border border-stone-200/50 transition-colors text-sm font-medium">
+                  <button onClick={() => { trackGoal('crosspromo_clicked', { app_name: app.app_name }); window.open(`https://onlinetochilka.github.io/${app.app_name}/`, '_blank'); }} className="w-full text-left p-3 rounded-xl bg-white/50 hover:bg-white text-stone-700 shadow-sm border border-stone-200/50 transition-colors text-sm font-medium">
                     {app.label}
                   </button>
                 </React.Fragment>
@@ -47,7 +48,7 @@ function GlassDrawer({ isOpen, onClose, onToggle }) {
             return (
               <button 
                 key={app.app_name}
-                onClick={() => app.app_name !== 'coming_soon' && window.open(`https://onlinetochilka.github.io/${app.app_name}/`, '_blank')} 
+                onClick={() => { if(app.app_name !== 'coming_soon') { trackGoal('crosspromo_clicked', { app_name: app.app_name }); window.open(`https://onlinetochilka.github.io/${app.app_name}/`, '_blank'); } }} 
                 className="w-full text-left p-3 rounded-xl bg-white/50 hover:bg-white text-stone-700 shadow-sm border border-stone-200/50 transition-colors text-sm font-medium"
               >
                 {app.label}

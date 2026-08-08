@@ -22,6 +22,7 @@ function PreviewSheet() {
 
   const isDouble = layout === '2-pages';
   const displayW = isDouble ? W * 2 : W;
+  const isLandscape = (layout === '2-pages') || (orientation === 'landscape');
 
   const renderSheet = (isClone = false) => {
     let currentMargin = margin;
@@ -45,6 +46,7 @@ function PreviewSheet() {
 
   return (
     <main className="preview-wrap">
+      <style>{`@page { size: ${isLandscape ? 'landscape' : 'portrait'}; margin: 0; }`}</style>
       <div 
         id="previewSheet"
         className="a4-sheet print-page"

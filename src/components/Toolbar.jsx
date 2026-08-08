@@ -1,4 +1,5 @@
 import React from 'react';
+import { trackGoal } from '../utils/analytics';
 
 function Toolbar({ editorRef, onUpdate }) {
   const applyStyle = (type, value) => {
@@ -68,6 +69,7 @@ function Toolbar({ editorRef, onUpdate }) {
   };
 
   const addAccent = () => {
+    trackGoal('accent_clicked');
     const sel = window.getSelection();
     if (!sel.rangeCount || !editorRef.current) return;
     const range = sel.getRangeAt(0);
