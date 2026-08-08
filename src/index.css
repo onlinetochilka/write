@@ -87,6 +87,14 @@
     overflow: hidden;
   }
 
+  @media (max-width: 1023px) {
+    .a4-sheet {
+      width: 100%;
+      height: auto;
+      max-height: none;
+    }
+  }
+
   .bg-editor-bg {
     background-color: #fafafa;
     background-image: linear-gradient(180deg, #e5e7eb 1px, transparent 1px);
