@@ -1,10 +1,9 @@
 import React from 'react';
 import { GRID_CFG, LATIN_RE, MATH_CHAR_RE } from './constants';
+import { getMeasuredWidth } from './textMeasurement';
 
 const r = (n) => +n.toFixed(3);
 
-let measureCtx = null;
-const textWidthCache = {};
 const lineCache = new Map();
 
 function getCachedLine(lineChunks, startX, endX, startY, H, fontSize, lineH, fill, stepY, cfg, gridType, initialX, kPfx) {
@@ -15,18 +14,6 @@ function getCachedLine(lineChunks, startX, endX, startY, H, fontSize, lineH, fil
   if (lineCache.size > 1000) lineCache.clear();
   lineCache.set(key, res);
   return res;
-}
-
-export function getMeasuredWidth(text, fontString) {
-  if (!measureCtx) {
-    measureCtx = document.createElement('canvas').getContext('2d');
-  }
-  const key = text + '|' + fontString;
-  if (textWidthCache[key] !== undefined) return textWidthCache[key];
-  measureCtx.font = fontString;
-  const width = measureCtx.measureText(text).width;
-  textWidthCache[key] = width;
-  return width;
 }
 
 export function getTextBounds(margin, W) {
@@ -44,14 +31,14 @@ function getDecorations(chunk, x, y, decWidth, fontSize, lineH, fill, keyPrefix)
     const ulC = '#4a4a4a'; // Фиксированный графитовый цвет для синтаксиса
     const uy = y + 2;
     if (chunk.ul === 'solid') {
-      elements.push(<line key={`${keyPrefix}_ul${k++}`} x1={r(x)} y1={r(uy)} x2={r(x + decWidth)} y2={r(uy)} stroke={ulC} strokeWidth={0.3} />);
+      elements.push({ type: 'line', key: `${keyPrefix}_ul${k++}`, x1: r(x), y1: r(uy), x2: r(x + decWidth), y2: r(uy), stroke: ulC, strokeWidth: 0.3 });
     } else if (chunk.ul === 'double') {
-      elements.push(<line key={`${keyPrefix}_ul${k++}`} x1={r(x)} y1={r(uy)} x2={r(x + decWidth)} y2={r(uy)} stroke={ulC} strokeWidth={0.3} />);
-      elements.push(<line key={`${keyPrefix}_ul${k++}`} x1={r(x)} y1={r(uy + 3)} x2={r(x + decWidth)} y2={r(uy + 3)} stroke={ulC} strokeWidth={0.3} />);
+      elements.push({ type: 'line', key: `${keyPrefix}_ul${k++}`, x1: r(x), y1: r(uy), x2: r(x + decWidth), y2: r(uy), stroke: ulC, strokeWidth: 0.3 });
+      elements.push({ type: 'line', key: `${keyPrefix}_ul${k++}`, x1: r(x), y1: r(uy + 3), x2: r(x + decWidth), y2: r(uy + 3), stroke: ulC, strokeWidth: 0.3 });
     } else if (chunk.ul === 'dashed') {
-      elements.push(<line key={`${keyPrefix}_ul${k++}`} x1={r(x)} y1={r(uy)} x2={r(x + decWidth)} y2={r(uy)} stroke={ulC} strokeWidth={0.3} strokeDasharray="4 3" />);
+      elements.push({ type: 'line', key: `${keyPrefix}_ul${k++}`, x1: r(x), y1: r(uy), x2: r(x + decWidth), y2: r(uy), stroke: ulC, strokeWidth: 0.3, strokeDasharray: "4 3" });
     } else if (chunk.ul === 'dotdash') {
-      elements.push(<line key={`${keyPrefix}_ul${k++}`} x1={r(x)} y1={r(uy)} x2={r(x + decWidth)} y2={r(uy)} stroke={ulC} strokeWidth={0.3} strokeDasharray="8 3 2 3" />);
+      elements.push({ type: 'line', key: `${keyPrefix}_ul${k++}`, x1: r(x), y1: r(uy), x2: r(x + decWidth), y2: r(uy), stroke: ulC, strokeWidth: 0.3, strokeDasharray: "8 3 2 3" });
     } else if (chunk.ul === 'wavy') {
       let d = `M ${r(x)} ${r(uy)}`;
       let up = true;
@@ -61,7 +48,7 @@ function getDecorations(chunk, x, y, decWidth, fontSize, lineH, fill, keyPrefix)
         d += ` Q ${r(cx + 1.5)} ${r(cy)} ${r(nx)} ${r(uy)}`;
         up = !up;
       }
-      elements.push(<path key={`${keyPrefix}_ul${k++}`} d={d} stroke={ulC} strokeWidth={0.3} fill="none" />);
+      elements.push({ type: 'path', key: `${keyPrefix}_ul${k++}`, d, stroke: ulC, strokeWidth: 0.3, fill: "none" });
     }
   }
 
@@ -72,19 +59,19 @@ function getDecorations(chunk, x, y, decWidth, fontSize, lineH, fill, keyPrefix)
 
     if (chunk.morph === 'prefix') {
       const d = `M ${r(x)} ${r(my)} L ${r(x + decWidth)} ${r(my)} L ${r(x + decWidth)} ${r(my + 4)}`;
-      elements.push(<path key={`${keyPrefix}_morph${k++}`} d={d} stroke={mC} strokeWidth={mSw} fill="none" />);
+      elements.push({ type: 'path', key: `${keyPrefix}_morph${k++}`, d, stroke: mC, strokeWidth: mSw, fill: "none" });
     } else if (chunk.morph === 'root') {
       const d = `M ${r(x)} ${r(my + 2)} Q ${r(x + decWidth / 2)} ${r(my - 4)} ${r(x + decWidth)} ${r(my + 2)}`;
-      elements.push(<path key={`${keyPrefix}_morph${k++}`} d={d} stroke={mC} strokeWidth={mSw} fill="none" />);
+      elements.push({ type: 'path', key: `${keyPrefix}_morph${k++}`, d, stroke: mC, strokeWidth: mSw, fill: "none" });
     } else if (chunk.morph === 'suffix') {
       const d = `M ${r(x)} ${r(my + 2)} L ${r(x + decWidth / 2)} ${r(my - 4)} L ${r(x + decWidth)} ${r(my + 2)}`;
-      elements.push(<path key={`${keyPrefix}_morph${k++}`} d={d} stroke={mC} strokeWidth={mSw} fill="none" />);
+      elements.push({ type: 'path', key: `${keyPrefix}_morph${k++}`, d, stroke: mC, strokeWidth: mSw, fill: "none" });
     } else if (chunk.morph === 'ending') {
       const boxH = fontSize * 0.8;
-      elements.push(<rect key={`${keyPrefix}_morph${k++}`} x={r(x)} y={r(y - boxH)} width={r(decWidth)} height={r(boxH + 2)} stroke={mC} strokeWidth={mSw} fill="none" />);
+      elements.push({ type: 'rect', key: `${keyPrefix}_morph${k++}`, x: r(x), y: r(y - boxH), width: r(decWidth), height: r(boxH + 2), stroke: mC, strokeWidth: mSw, fill: "none" });
     } else if (chunk.morph === 'base') {
       const d = `M ${r(x)} ${r(y)} L ${r(x)} ${r(y + 4)} L ${r(x + decWidth)} ${r(y + 4)} L ${r(x + decWidth)} ${r(y)}`;
-      elements.push(<path key={`${keyPrefix}_morph${k++}`} d={d} stroke={mC} strokeWidth={0.3} fill="none" />);
+      elements.push({ type: 'path', key: `${keyPrefix}_morph${k++}`, d, stroke: mC, strokeWidth: 0.3, fill: "none" });
     }
   }
   return elements;
@@ -154,16 +141,21 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
 
         const parts = chunkStr.split(/(\d+)/g);
         
-        elements.push(
-          <text key={`${kPfx}_text${k++}`} x={r(currentX)} y={r(yPos)} fontSize={r(fontSize)} dominantBaseline="alphabetic" xmlSpace="preserve" fill={chunkColor} fontFamily={font}>
-            {parts.map((part, pIdx) => {
-              if (/\d+/.test(part)) {
-                return <tspan key={pIdx} fontFamily={digitFamily} fontSize={r(digitFs)} fontWeight={weight}>{part}</tspan>;
-              }
-              return part;
-            })}
-          </text>
-        );
+        elements.push({
+          type: 'text',
+          key: `${kPfx}_text${k++}`,
+          x: r(currentX),
+          y: r(yPos),
+          fontSize: r(fontSize),
+          fill: chunkColor,
+          fontFamily: font,
+          parts: parts.map(part => {
+            if (/\d+/.test(part)) {
+              return { isDigit: true, text: part, digitFamily, digitFs: r(digitFs), weight };
+            }
+            return { isDigit: false, text: part };
+          })
+        });
 
         const trimmedText = accText.trimEnd();
         const decWidth = measureMixedText(trimmedText);
@@ -178,7 +170,16 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
         if (y <= H && accText !== '') {
           const wText = measureMixedText(accText);
           const accX = currentX + wText - (fontSize * 0.15);
-          elements.push(<text key={`${kPfx}_acc${k++}`} x={r(accX)} y={r(y - fontSize * 0.15)} fontFamily="Arial" fontSize={r(fontSize * 0.8)} fill={chunkColor}>´</text>);
+          elements.push({
+            type: 'text-acc',
+            key: `${kPfx}_acc${k++}`,
+            x: r(accX),
+            y: r(y - fontSize * 0.15),
+            fontFamily: "Arial",
+            fontSize: r(fontSize * 0.8),
+            fill: chunkColor,
+            text: '´'
+          });
         }
         i++;
         continue;
@@ -290,7 +291,17 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
       if (ch === '´') {
         if (rowY <= H && col > 0) {
           const prevCx = startX + (col - 1) * step + step / 2;
-          allElements.push(<text key={`macc${lIdx}_${col}`} x={r(prevCx)} y={r(rowY - fontSize * 0.15)} fontFamily="Arial" fontSize={r(fontSize * 0.8)} fill={chColor} textAnchor="middle">´</text>);
+          allElements.push({
+            type: 'text-acc',
+            key: `macc${lIdx}_${col}`,
+            x: r(prevCx),
+            y: r(rowY - fontSize * 0.15),
+            fontFamily: "Arial",
+            fontSize: r(fontSize * 0.8),
+            fill: chColor,
+            textAnchor: "middle",
+            text: '´'
+          });
         }
         i++;
         continue;
@@ -313,11 +324,18 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
         }
 
         const chStr = isPrint ? ch.toUpperCase() : ch;
-        allElements.push(
-          <text key={`mtxt${lIdx}_${col}`} x={cx} y={r(rowY)} fontFamily={isPrint ? 'RazerF5' : 'ClassRoomCursive'} fontSize={r(digitFs)} fontWeight={isPrint ? 'normal' : 'bold'} fill={chColor} textAnchor="middle" dominantBaseline="alphabetic">
-            {chStr}
-          </text>
-        );
+        allElements.push({
+          type: 'math-text',
+          key: `mtxt${lIdx}_${col}`,
+          x: cx,
+          y: r(rowY),
+          fontFamily: isPrint ? 'RazerF5' : 'ClassRoomCursive',
+          fontSize: r(digitFs),
+          fontWeight: isPrint ? 'normal' : 'bold',
+          fill: chColor,
+          textAnchor: "middle",
+          text: chStr
+        });
 
         const wText = getMeasuredWidth(chStr.replace(/ /g, '\u00A0'), `${r(digitFs)}px '${isPrint ? 'RazerF5' : 'ClassRoomCursive'}'`);
         allElements.push(...getDecorations(chunkObj, cx - wText/2, rowY, wText, fontSize, lineH, fill, `mdec${lIdx}_${col}`));
@@ -358,6 +376,38 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
   return allElements;
 }
 
+function renderDataElements(dataElements) {
+  return dataElements.map((el) => {
+    if (el.type === 'line') {
+      return <line key={el.key} x1={el.x1} y1={el.y1} x2={el.x2} y2={el.y2} stroke={el.stroke} strokeWidth={el.strokeWidth} strokeDasharray={el.strokeDasharray} />;
+    } else if (el.type === 'path') {
+      return <path key={el.key} d={el.d} stroke={el.stroke} strokeWidth={el.strokeWidth} fill={el.fill} />;
+    } else if (el.type === 'rect') {
+      return <rect key={el.key} x={el.x} y={el.y} width={el.width} height={el.height} stroke={el.stroke} strokeWidth={el.strokeWidth} fill={el.fill} />;
+    } else if (el.type === 'text') {
+      return (
+        <text key={el.key} x={el.x} y={el.y} fontSize={el.fontSize} dominantBaseline="alphabetic" xmlSpace="preserve" fill={el.fill} fontFamily={el.fontFamily}>
+          {el.parts.map((part, pIdx) => {
+            if (part.isDigit) {
+              return <tspan key={pIdx} fontFamily={part.digitFamily} fontSize={part.digitFs} fontWeight={part.weight}>{part.text}</tspan>;
+            }
+            return part.text;
+          })}
+        </text>
+      );
+    } else if (el.type === 'text-acc') {
+      return <text key={el.key} x={el.x} y={el.y} fontFamily={el.fontFamily} fontSize={el.fontSize} fill={el.fill} textAnchor={el.textAnchor}>{el.text}</text>;
+    } else if (el.type === 'math-text') {
+      return (
+        <text key={el.key} x={el.x} y={el.y} fontFamily={el.fontFamily} fontSize={el.fontSize} fontWeight={el.fontWeight} fill={el.fill} textAnchor={el.textAnchor} dominantBaseline="alphabetic">
+          {el.text}
+        </text>
+      );
+    }
+    return null;
+  });
+}
+
 export function buildTextGroup(W, H, gridType, mode, mathMode, margin, textLines) {
   const cfg = GRID_CFG[gridType] || GRID_CFG.narrow;
   const fill = mode === 'copy' ? '#1a1a2e' : '#c0cdd8';
@@ -371,5 +421,5 @@ export function buildTextGroup(W, H, gridType, mode, mathMode, margin, textLines
   } else {
     elements = renderNormalLines(W, maxH, cfg, margin, gridType, textLines, fill, topOffset);
   }
-  return <g id="svgText">{elements}</g>;
+  return <g id="svgText">{renderDataElements(elements)}</g>;
 }
