@@ -14,6 +14,8 @@ export const StoreProvider = ({ children }) => {
     mathMode: false,
     margin: 'left',
     mirrorMargins: false,
+    printFont: 'ClassRoomCursive',
+    printFontSize: 5,
     textLines: [
       [{ text: 'Аа Бб Вв 1 2 3 4 5' }],
       [],
@@ -21,6 +23,8 @@ export const StoreProvider = ({ children }) => {
       [],
       [{ text: 'С Точилкой всё сходится!' }]
     ],
+    shapes: [],
+    selectedShapeId: null,
   });
 
   const updateState = React.useCallback((updates) => {

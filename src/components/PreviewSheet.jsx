@@ -1,20 +1,22 @@
-import React, { memo } from 'react';
+import React, { memo, useRef } from 'react';
 import { useStore } from '../Store';
 import { PAPER_DIMS } from '../utils/constants';
 import { buildGridGroup } from '../utils/svgGrid';
 import { buildTextGroup } from '../utils/svgText';
+import ShapesLayer from './ShapesLayer';
 
 const MemoizedGrid = memo(({ W, H, grid, margin }) => {
   return buildGridGroup(W, H, grid, margin);
 });
 
-const MemoizedText = memo(({ W, H, grid, mode, mathMode, margin, textLines }) => {
-  return buildTextGroup(W, H, grid, mode, mathMode, margin, textLines);
+const MemoizedText = memo(({ W, H, grid, mode, mathMode, margin, textLines, printFont, printFontSize }) => {
+  return buildTextGroup(W, H, grid, mode, mathMode, margin, textLines, printFont, printFontSize);
 });
 
 function PreviewSheet() {
   const { state } = useStore();
-  const { format, orientation, grid, mode, layout, mathMode, margin, mirrorMargins, textLines } = state;
+  const { format, orientation, grid, mode, layout, mathMode, margin, mirrorMargins, textLines, printFont, printFontSize } = state;
+  const svgRef = useRef(null);
 
   const b = PAPER_DIMS[format] || PAPER_DIMS.a4;
   const W = orientation === 'landscape' ? b.h : b.w;
@@ -39,7 +41,7 @@ function PreviewSheet() {
       >
         <rect x={0} y={0} width={W} height={H} fill="#ffffff" />
         <MemoizedGrid W={W} H={H} grid={grid} margin={currentMargin} />
-        <MemoizedText W={W} H={H} grid={grid} mode={mode} mathMode={mathMode} margin={currentMargin} textLines={textLines} />
+        <MemoizedText W={W} H={H} grid={grid} mode={mode} mathMode={mathMode} margin={currentMargin} textLines={textLines} printFont={printFont} printFontSize={printFontSize} />
       </svg>
     );
   };
@@ -49,13 +51,24 @@ function PreviewSheet() {
       <style>{`@page { size: ${isLandscape ? 'landscape' : 'portrait'}; margin: 0; }`}</style>
       <div 
         id="previewSheet"
-        className="a4-sheet print-page"
+        className="a4-sheet print-page relative"
         style={{ aspectRatio: `${displayW} / ${H}` }}
         role="img"
         aria-label="Предпросмотр листа прописей"
       >
         {renderSheet(false)}
         {isDouble && renderSheet(true)}
+
+        {/* Global shapes overlay that covers all pages */}
+        <svg
+          ref={svgRef}
+          className="absolute inset-0 w-full h-full"
+          style={{ pointerEvents: 'auto' }}
+          viewBox={`0 0 ${displayW} ${H}`}
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <ShapesLayer W={displayW} H={H} svgRef={svgRef} />
+        </svg>
       </div>
     </main>
   );

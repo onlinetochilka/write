@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Open+Sans:wght@400;700&family=PT+Sans:wght@400;700&family=Roboto:wght@400;700&display=swap');
+
+
 @font-face {
     font-family: 'Propisi';
     src: url('/ofont.ru_Propisi.ttf') format('truetype');
@@ -87,6 +90,14 @@
     background-color: #fafafa;
     background-image: linear-gradient(180deg, #e5e7eb 1px, transparent 1px);
     background-size: 100% 1.5rem;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 

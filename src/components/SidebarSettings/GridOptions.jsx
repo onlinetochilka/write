@@ -21,31 +21,31 @@ const GridOptions = ({ grid, mathMode, updateState }) => {
           Частая косая<br/><span className={`text-[10px] font-normal ${grid === 'frequent' ? 'text-stone-500' : 'opacity-80'}`}>(1 класс)</span>
         </button>
         <button 
-          className={`flex items-center justify-center h-10 px-2 rounded-xl text-xs transition-all ${grid === 'slanted' ? 'bg-white text-stone-900 font-medium shadow-sm ring-1 ring-black/5' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'}`}
+          className={`flex items-center justify-center h-8 px-2 rounded-xl text-xs transition-all ${grid === 'slanted' ? 'bg-white text-stone-900 font-medium shadow-sm ring-1 ring-black/5' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'}`}
           onClick={() => updateState({ grid: 'slanted' })}
         >
           Редкая косая
         </button>
         <button 
-          className={`flex items-center justify-center h-10 px-2 rounded-xl text-xs transition-all ${grid === 'narrow' ? 'bg-white text-stone-900 font-medium shadow-sm ring-1 ring-black/5' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'}`}
+          className={`flex items-center justify-center h-8 px-2 rounded-xl text-xs transition-all ${grid === 'narrow' ? 'bg-white text-stone-900 font-medium shadow-sm ring-1 ring-black/5' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'}`}
           onClick={() => updateState({ grid: 'narrow' })}
         >
           Узкая линия
         </button>
         <button 
-          className={`flex items-center justify-center h-10 px-2 rounded-xl text-xs transition-all ${grid === 'wide' ? 'bg-white text-stone-900 font-medium shadow-sm ring-1 ring-black/5' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'}`}
+          className={`flex items-center justify-center h-8 px-2 rounded-xl text-xs transition-all ${grid === 'wide' ? 'bg-white text-stone-900 font-medium shadow-sm ring-1 ring-black/5' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'}`}
           onClick={() => updateState({ grid: 'wide' })}
         >
           Широкая линия
         </button>
         <button 
-          className={`flex items-center justify-center h-10 px-2 rounded-xl text-xs transition-all ${grid === 'squared' ? 'bg-white text-stone-900 font-medium shadow-sm ring-1 ring-black/5' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'}`}
+          className={`flex items-center justify-center h-8 px-2 rounded-xl text-xs transition-all ${grid === 'squared' ? 'bg-white text-stone-900 font-medium shadow-sm ring-1 ring-black/5' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'}`}
           onClick={() => updateState({ grid: 'squared' })}
         >
           Клетка
         </button>
         <button 
-          className={`flex items-center justify-center h-10 px-2 rounded-xl text-xs transition-all ${grid === 'large_squared' ? 'bg-white text-stone-900 font-medium shadow-sm ring-1 ring-black/5' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'}`}
+          className={`flex items-center justify-center h-8 px-2 rounded-xl text-xs transition-all ${grid === 'large_squared' ? 'bg-white text-stone-900 font-medium shadow-sm ring-1 ring-black/5' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'}`}
           onClick={() => updateState({ grid: 'large_squared' })}
         >
           Крупная клетка

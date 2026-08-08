@@ -1,16 +1,16 @@
 import React from 'react';
-import { GRID_CFG, LATIN_RE, MATH_CHAR_RE } from './constants';
+import { GRID_CFG, LATIN_RE, MATH_CHAR_RE, getGridOffsets } from './constants';
 import { getMeasuredWidth } from './textMeasurement';
 
 const r = (n) => +n.toFixed(3);
 
 const lineCache = new Map();
 
-function getCachedLine(lineChunks, startX, endX, startY, H, fontSize, lineH, fill, stepY, cfg, gridType, initialX, kPfx) {
+function getCachedLine(lineChunks, startX, endX, startY, H, fontSize, lineH, fill, stepY, cfg, gridType, initialX, kPfx, printFont, printFontSize, align) {
   const cfgStr = cfg ? cfg.step : 'none';
-  const key = JSON.stringify(lineChunks) + `|${startX}|${endX}|${startY}|${H}|${fontSize}|${lineH}|${fill}|${stepY}|${cfgStr}|${gridType}|${initialX}|${kPfx}`;
+  const key = JSON.stringify(lineChunks) + `|${startX}|${endX}|${startY}|${H}|${fontSize}|${lineH}|${fill}|${stepY}|${cfgStr}|${gridType}|${initialX}|${kPfx}|${printFont}|${printFontSize}|${align}`;
   if (lineCache.has(key)) return lineCache.get(key);
-  const res = renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH, fill, stepY, cfg, gridType, initialX, kPfx);
+  const res = renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH, fill, stepY, cfg, gridType, initialX, kPfx, printFont, printFontSize, align);
   if (lineCache.size > 1000) lineCache.clear();
   lineCache.set(key, res);
   return res;
@@ -66,40 +66,47 @@ function getDecorations(chunk, x, y, decWidth, fontSize, lineH, fill, keyPrefix)
     } else if (chunk.morph === 'suffix') {
       const d = `M ${r(x)} ${r(my + 2)} L ${r(x + decWidth / 2)} ${r(my - 4)} L ${r(x + decWidth)} ${r(my + 2)}`;
       elements.push({ type: 'path', key: `${keyPrefix}_morph${k++}`, d, stroke: mC, strokeWidth: mSw, fill: "none" });
-    } else if (chunk.morph === 'ending') {
-      const boxH = fontSize * 0.8;
-      elements.push({ type: 'rect', key: `${keyPrefix}_morph${k++}`, x: r(x), y: r(y - boxH), width: r(decWidth), height: r(boxH + 2), stroke: mC, strokeWidth: mSw, fill: "none" });
-    } else if (chunk.morph === 'base') {
-      const d = `M ${r(x)} ${r(y)} L ${r(x)} ${r(y + 4)} L ${r(x + decWidth)} ${r(y + 4)} L ${r(x + decWidth)} ${r(y)}`;
-      elements.push({ type: 'path', key: `${keyPrefix}_morph${k++}`, d, stroke: mC, strokeWidth: 0.3, fill: "none" });
+      } else if (chunk.morph === 'ending') {
+        const boxH = fontSize * 0.8;
+        elements.push({ type: 'rect', key: `${keyPrefix}_morph${k++}`, x: r(x), y: r(y - boxH), width: r(decWidth), height: r(boxH + 2), stroke: mC, strokeWidth: mSw, fill: "none" });
+      }
     }
-  }
+
+    if (chunk.base) {
+      const mC = '#2e7d32'; // Фиксированный зеленый цвет для морфологии
+      const d = `M ${r(x)} ${r(y)} L ${r(x)} ${r(y + 4)} L ${r(x + decWidth)} ${r(y + 4)} L ${r(x + decWidth)} ${r(y)}`;
+      elements.push({ type: 'path', key: `${keyPrefix}_base${k++}`, d, stroke: mC, strokeWidth: 0.3, fill: "none" });
+    }
   return elements;
 }
 
-function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH, fill, stepY, cfg, gridType, initialX = startX, kPfx) {
-  const measureMixedText = (textStr) => {
+function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH, fill, stepY, cfg, gridType, initialX = startX, kPfx, printFont, printFontSize, align) {
+  const measureMixedText = (textStr, chunkObj) => {
     let w = 0;
-    const isPrint = gridType === 'large_squared';
-    let font = LATIN_RE.test(textStr) ? 'ClassRoomCursive' : 'Propisi';
-    if (isPrint) font = 'RazerF5';
+    const chunkFont = chunkObj?.font || printFont;
+    const chunkFs = chunkObj?.fs || printFontSize;
     
-    let digitFs = fontSize;
-    if (isPrint) digitFs = fontSize;
-    else if (cfg) {
+    const isCursive = chunkFont === 'ClassRoomCursive';
+    let font = isCursive ? (LATIN_RE.test(textStr) ? 'ClassRoomCursive' : 'Propisi') : chunkFont;
+    let baseFontSize = isCursive ? fontSize : chunkFs;
+    
+    let digitFs = baseFontSize;
+    if (isCursive && cfg) {
       if (cfg.hasHelper) digitFs = fontSize * 0.60;
       else if (cfg.step === 5) digitFs = fontSize * 0.65;
       else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
     }
-    let digitFamily = isPrint ? 'RazerF5' : 'ClassRoomCursive';
+    let digitFamily = isCursive ? 'ClassRoomCursive' : chunkFont;
+    let baseWeight = chunkObj?.bold ? 'bold' : 'normal';
+    let digitWeight = chunkObj?.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
 
     const parts = textStr.split(/(\d+)/g);
     for (const part of parts) {
       if (!part) continue;
       if (/\d+/.test(part)) {
-         w += getMeasuredWidth(part, `${r(digitFs)}px '${digitFamily}'`);
+         w += getMeasuredWidth(part, `${digitWeight} ${r(digitFs)}px '${digitFamily}'`);
       } else {
-         w += getMeasuredWidth(part.replace(/ /g, '\u00A0'), `${r(fontSize)}px '${font}'`);
+         w += getMeasuredWidth(part.replace(/ /g, '\u00A0'), `${baseWeight} ${r(baseFontSize)}px '${font}'`);
       }
     }
     return w;
@@ -120,24 +127,26 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
 
     const flushAcc = (yPos) => {
       if (!accText) return;
-      const fontName = LATIN_RE.test(accText) ? 'ClassRoomCursive' : 'Propisi';
-      const estWidth = measureMixedText(accText);
+      const estWidth = measureMixedText(accText, chunkObj);
 
       if (yPos <= H) {
-        const isPrint = gridType === 'large_squared';
-        let chunkStr = isPrint ? accText.toUpperCase() : accText;
-        let font = LATIN_RE.test(chunkStr) ? 'ClassRoomCursive' : 'Propisi';
-        if (isPrint) font = 'RazerF5';
+        let chunkStr = accText;
+        const chunkFont = chunkObj?.font || printFont;
+        const chunkFs = chunkObj?.fs || printFontSize;
+
+        const isCursive = chunkFont === 'ClassRoomCursive';
+        let font = isCursive ? (LATIN_RE.test(chunkStr) ? 'ClassRoomCursive' : 'Propisi') : chunkFont;
         
-        let digitFs = fontSize;
-        if (isPrint) digitFs = fontSize;
-        else if (cfg) {
+        let fontSz = isCursive ? fontSize : chunkFs;
+        let digitFs = fontSz;
+        if (isCursive && cfg) {
           if (cfg.hasHelper) digitFs = fontSize * 0.60;
           else if (cfg.step === 5) digitFs = fontSize * 0.65;
           else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
         }
-        let digitFamily = isPrint ? 'RazerF5' : 'ClassRoomCursive';
-        let weight = isPrint ? 'normal' : 'bold';
+        let digitFamily = isCursive ? 'ClassRoomCursive' : chunkFont;
+        let baseWeight = chunkObj.bold ? 'bold' : 'normal';
+        let digitWeight = chunkObj.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
 
         const parts = chunkStr.split(/(\d+)/g);
         
@@ -146,19 +155,20 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
           key: `${kPfx}_text${k++}`,
           x: r(currentX),
           y: r(yPos),
-          fontSize: r(fontSize),
+          fontSize: r(fontSz),
+          fontWeight: baseWeight,
           fill: chunkColor,
           fontFamily: font,
           parts: parts.map(part => {
             if (/\d+/.test(part)) {
-              return { isDigit: true, text: part, digitFamily, digitFs: r(digitFs), weight };
+              return { isDigit: true, text: part, digitFamily, digitFs: r(digitFs), weight: digitWeight };
             }
             return { isDigit: false, text: part };
           })
         });
 
         const trimmedText = accText.trimEnd();
-        const decWidth = measureMixedText(trimmedText);
+        const decWidth = measureMixedText(trimmedText, chunkObj);
         elements.push(...getDecorations(chunkObj, currentX, yPos, decWidth, fontSize, lineH, fill, `${kPfx}_dec${k++}`));
       }
       currentX += estWidth;
@@ -168,7 +178,7 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
     while (i < text.length) {
       if (text[i] === '´') {
         if (y <= H && accText !== '') {
-          const wText = measureMixedText(accText);
+          const wText = measureMixedText(accText, chunkObj);
           const accX = currentX + wText - (fontSize * 0.15);
           elements.push({
             type: 'text-acc',
@@ -187,7 +197,7 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
 
       const ch = text[i];
       if (accText === '') {
-        const chW = measureMixedText(ch);
+        const chW = measureMixedText(ch, chunkObj);
         if (currentX + chW > endX && currentX > startX) {
           y += stepY;
           currentX = startX;
@@ -207,7 +217,7 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
       }
 
       const testStr = accText + ch;
-      const estWidth = measureMixedText(testStr);
+      const estWidth = measureMixedText(testStr, chunkObj);
 
       if (currentX + estWidth > endX) {
         flushAcc(y);
@@ -220,31 +230,76 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
     }
     flushAcc(y);
   }
-  return { elements, endY: y, endX: currentX };
+  return { y, elements };
 }
 
-function renderNormalLines(W, H, cfg, margin, gridType, textLines, fill, topOffset) {
+function renderNormalLines(W, H, cfg, margin, gridType, textLines, fill, topOffset, printFont, printFontSize) {
   const { fontSize, lineH, step } = cfg;
   const { startX, endX } = getTextBounds(margin, W);
-  let y = topOffset + ((gridType === 'squared' || gridType === 'large_squared') ? step * 2 : step);
+  let y = topOffset + ((gridType === 'squared' || gridType === 'large_squared') ? step * 2 : 0);
   const allElements = [];
   let k = 0;
 
-  textLines.forEach((rawLine, idx) => {
-    if (y > H) return;
-    const lineChunks = Array.isArray(rawLine) ? rawLine : [{ text: rawLine }];
-    if (!lineChunks.some(ch => ch.text)) {
+  textLines.forEach((lineData, idx) => {
+    const rawLine = lineData.chunks || lineData;
+    let align = lineData.align || 'left';
+    if (!rawLine.length) {
       y += lineH;
       return;
     }
-    const res = getCachedLine(lineChunks, startX, endX, y, H, fontSize, lineH, fill, lineH, cfg, gridType, startX, `line${idx}`);
+
+    let initialX = startX;
+    
+    // Pre-measure entire line for alignment
+    if (align === 'center' || align === 'right') {
+      let totalW = 0;
+      rawLine.forEach(chunkObj => {
+        if (!chunkObj.text) return;
+        const textStr = chunkObj.text;
+        
+        const chunkFont = chunkObj?.font || printFont;
+        const chunkFs = chunkObj?.fs || printFontSize;
+        
+        const isCursive = chunkFont === 'ClassRoomCursive';
+        let font = isCursive ? (LATIN_RE.test(textStr) ? 'ClassRoomCursive' : 'Propisi') : chunkFont;
+        
+        let fontSz = isCursive ? fontSize : chunkFs;
+        let digitFs = fontSz;
+        if (isCursive && cfg) {
+          if (cfg.hasHelper) digitFs = fontSize * 0.60;
+          else if (cfg.step === 5) digitFs = fontSize * 0.65;
+          else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
+        }
+        let digitFamily = isCursive ? 'ClassRoomCursive' : chunkFont;
+        let baseWeight = chunkObj.bold ? 'bold' : 'normal';
+        let digitWeight = chunkObj.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
+
+        const parts = textStr.split(/(\d+)/g);
+        for (const part of parts) {
+          if (!part) continue;
+          if (/\d+/.test(part)) {
+             totalW += getMeasuredWidth(part, `${digitWeight} ${r(digitFs)}px '${digitFamily}'`);
+          } else {
+             totalW += getMeasuredWidth(part.replace(/ /g, '\u00A0'), `${baseWeight} ${r(fontSz)}px '${font}'`);
+          }
+        }
+      });
+      
+      const available = endX - startX;
+      if (totalW < available) {
+        if (align === 'center') initialX = startX + (available - totalW) / 2;
+        if (align === 'right') initialX = endX - totalW;
+      }
+    }
+
+    const res = renderLineWithWrap(rawLine, startX, endX, y, H, fontSize, lineH, fill, lineH, cfg, gridType, initialX, `nl${idx}_${k++}`, printFont, printFontSize, align);
     allElements.push(...res.elements);
-    y = res.endY + lineH;
+    y = res.y + lineH;
   });
   return allElements;
 }
 
-function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset) {
+function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset, printFont, printFontSize) {
   const { step, lineH, fontSize } = cfg;
   
   let redLineX = 0;
@@ -257,15 +312,17 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
 
   const cols = Math.floor((endX - startX) / step);
   let rowY = topOffset + ((gridType === 'squared' || gridType === 'large_squared') ? step * 2 : step);
-  const isPrint = gridType === 'large_squared';
+  const isCursive = printFont === 'ClassRoomCursive';
   
   const allElements = [];
 
-  textLines.forEach((rawLine, lIdx) => {
+  textLines.forEach((lineData, lIdx) => {
     if (rowY > H) return;
-    const lineChunks = Array.isArray(rawLine) ? rawLine : [{ text: rawLine }];
+    const rawLine = lineData.chunks || lineData;
+    let align = lineData.align || 'left';
+    
     const chars = [];
-    for (const chunkObj of lineChunks) {
+    for (const chunkObj of rawLine) {
       if (!chunkObj.text) continue;
       let i = 0;
       const t = chunkObj.text;
@@ -279,14 +336,25 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
         }
       }
     }
+    
+    let totalChars = chars.filter(c => c.ch !== '´').length;
+    let startCol = 0;
+    if (align === 'center' && totalChars < cols) startCol = Math.floor((cols - totalChars) / 2);
+    else if (align === 'right' && totalChars < cols) startCol = cols - totalChars;
 
-    let col = 0;
+    let col = startCol;
     let i = 0;
 
     while (i < chars.length) {
       if (rowY > H) break;
       const { ch, chunkObj } = chars[i];
       const chColor = chunkObj.color || fill;
+      
+      const chunkFont = chunkObj?.font || printFont;
+      const chunkFs = chunkObj?.fs || printFontSize;
+      const isCursive = chunkFont === 'ClassRoomCursive';
+
+      const weight = chunkObj.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
 
       if (ch === '´') {
         if (rowY <= H && col > 0) {
@@ -309,35 +377,34 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
 
       if (ch === ' ') {
         col++;
-        if (col >= cols) { rowY += lineH; col = 0; }
+        if (col >= cols) { rowY += lineH; col = startCol; }
         i++;
-      } else if (isPrint || MATH_CHAR_RE.test(ch)) {
-        if (col >= cols) { rowY += lineH; col = 0; }
+      } else if (!isCursive || MATH_CHAR_RE.test(ch)) {
+        if (col >= cols) { rowY += lineH; col = startCol; }
         const cx = r(startX + col * step + step / 2);
         
-        let digitFs = fontSize;
-        if (isPrint) digitFs = fontSize * 0.94;
-        else if (cfg) {
+        let digitFs = isCursive ? fontSize : chunkFs;
+        if (isCursive && cfg) {
           if (cfg.hasHelper) digitFs = fontSize * 0.60;
           else if (cfg.step === 5) digitFs = fontSize * 0.65;
           else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
         }
 
-        const chStr = isPrint ? ch.toUpperCase() : ch;
+        const chStr = ch;
         allElements.push({
           type: 'math-text',
           key: `mtxt${lIdx}_${col}`,
           x: cx,
           y: r(rowY),
-          fontFamily: isPrint ? 'RazerF5' : 'ClassRoomCursive',
+          fontFamily: isCursive ? 'ClassRoomCursive' : chunkFont,
           fontSize: r(digitFs),
-          fontWeight: isPrint ? 'normal' : 'bold',
+          fontWeight: weight,
           fill: chColor,
           textAnchor: "middle",
           text: chStr
         });
 
-        const wText = getMeasuredWidth(chStr.replace(/ /g, '\u00A0'), `${r(digitFs)}px '${isPrint ? 'RazerF5' : 'ClassRoomCursive'}'`);
+        const wText = getMeasuredWidth(chStr.replace(/ /g, '\u00A0'), `${weight} ${r(digitFs)}px '${isCursive ? 'ClassRoomCursive' : chunkFont}'`);
         allElements.push(...getDecorations(chunkObj, cx - wText/2, rowY, wText, fontSize, lineH, fill, `mdec${lIdx}_${col}`));
 
         col++;
@@ -363,9 +430,9 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
         }
         if (currSub) wordChunks.push(currSub);
 
-        const res = getCachedLine(wordChunks, startX, endX, rowY, H, fontSize, lineH, fill, lineH, cfg, gridType, wordStartX, `mwrd${lIdx}_${col}`);
+        const res = getCachedLine(wordChunks, startX, endX, rowY, H, fontSize, lineH, fill, lineH, cfg, gridType, wordStartX, `mwrd${lIdx}_${col}`, printFont, printFontSize, align);
         allElements.push(...res.elements);
-        rowY = res.endY;
+        rowY = res.y;
         col = Math.max(0, Math.round((res.endX - startX) / step));
         
         i = j;
@@ -386,7 +453,7 @@ function renderDataElements(dataElements) {
       return <rect key={el.key} x={el.x} y={el.y} width={el.width} height={el.height} stroke={el.stroke} strokeWidth={el.strokeWidth} fill={el.fill} />;
     } else if (el.type === 'text') {
       return (
-        <text key={el.key} x={el.x} y={el.y} fontSize={el.fontSize} dominantBaseline="alphabetic" xmlSpace="preserve" fill={el.fill} fontFamily={el.fontFamily}>
+        <text key={el.key} x={el.x} y={el.y} fontSize={el.fontSize} fontWeight={el.fontWeight} dominantBaseline="alphabetic" xmlSpace="preserve" fill={el.fill} fontFamily={el.fontFamily}>
           {el.parts.map((part, pIdx) => {
             if (part.isDigit) {
               return <tspan key={pIdx} fontFamily={part.digitFamily} fontSize={part.digitFs} fontWeight={part.weight}>{part.text}</tspan>;
@@ -408,18 +475,18 @@ function renderDataElements(dataElements) {
   });
 }
 
-export function buildTextGroup(W, H, gridType, mode, mathMode, margin, textLines) {
+export function buildTextGroup(W, H, gridType, mode, mathMode, margin, textLines, printFont = 'PT Sans', printFontSize = 30) {
   const cfg = GRID_CFG[gridType] || GRID_CFG.narrow;
   const fill = mode === 'copy' ? '#1a1a2e' : '#c0cdd8';
 
-  const topOffset = Math.ceil(25 / cfg.step) * cfg.step;
-  const maxH = H - 15;
+  const { topOffset, bottomOffset } = getGridOffsets(gridType);
+  const maxH = H - bottomOffset;
 
   let elements = [];
   if (gridType === 'large_squared' || (gridType === 'squared' && mathMode)) {
-    elements = renderMathLines(W, maxH, cfg, margin, gridType, textLines, fill, topOffset);
+    elements = renderMathLines(W, maxH, cfg, margin, gridType, textLines, fill, topOffset, printFont, printFontSize);
   } else {
-    elements = renderNormalLines(W, maxH, cfg, margin, gridType, textLines, fill, topOffset);
+    elements = renderNormalLines(W, maxH, cfg, margin, gridType, textLines, fill, topOffset, printFont, printFontSize);
   }
-  return <g id="svgText">{renderDataElements(elements)}</g>;
+  return <g id="svgText" key={`${gridType}-${mode}-${mathMode}`}>{renderDataElements(elements)}</g>;
 }
