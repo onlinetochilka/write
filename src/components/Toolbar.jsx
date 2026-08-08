@@ -3,7 +3,7 @@ import { trackGoal } from '../utils/analytics';
 
 import { applyStyleToSelection } from '../utils/textFormatting';
 
-function Toolbar({ editorRef, onUpdate, onClear }) {
+function Toolbar({ editorRef, onUpdate, onClear, onUndo, onRedo }) {
   const applyStyle = (type, value) => {
     applyStyleToSelection(editorRef, type, value, onUpdate);
   };
@@ -56,19 +56,23 @@ function Toolbar({ editorRef, onUpdate, onClear }) {
             isBold = true;
             break;
         }
+        if (currentSpan.dataset.bold === 'false') {
+            isBold = false;
+            break;
+        }
         currentSpan = currentSpan.parentElement.closest('span');
     }
     applyStyle('bold', isBold ? 'false' : 'true');
   };
 
   const handleUndo = () => {
-    document.execCommand('undo');
-    onUpdate();
+    if (onUndo) onUndo();
+    else document.execCommand('undo');
   };
 
   const handleRedo = () => {
-    document.execCommand('redo');
-    onUpdate();
+    if (onRedo) onRedo();
+    else document.execCommand('redo');
   };
 
   return (

@@ -61,13 +61,8 @@ export const applyStyleToSelection = (editorRef, type, value, onUpdate) => {
     targetSpan.style.color = value;
   }
   if (type === 'bold') {
-    if (value === 'false') {
-      delete targetSpan.dataset.bold;
-      targetSpan.style.fontWeight = 'normal';
-    } else {
-      targetSpan.dataset.bold = value;
-      targetSpan.style.fontWeight = 'bold';
-    }
+    targetSpan.dataset.bold = value;
+    targetSpan.style.fontWeight = value === 'false' ? 'normal' : 'bold';
   }
   if (type === 'font') targetSpan.dataset.font = value;
   if (type === 'fs') targetSpan.dataset.fs = value;
@@ -81,13 +76,8 @@ export const applyStyleToSelection = (editorRef, type, value, onUpdate) => {
             span.style.color = value;
         }
         if (type === 'bold') {
-            if (value === 'false') {
-               delete span.dataset.bold;
-               span.style.fontWeight = 'normal';
-            } else {
-               span.dataset.bold = value;
-               span.style.fontWeight = 'bold';
-            }
+            span.dataset.bold = value;
+            span.style.fontWeight = value === 'false' ? 'normal' : 'bold';
         }
         if (type === 'font') span.dataset.font = value;
         if (type === 'fs') span.dataset.fs = value;

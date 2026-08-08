@@ -218,12 +218,12 @@ function SidebarSettings({ onOpenHelp }) {
           </button>
         </div>
 
-        <div className="flex-1 lg:overflow-y-auto relative scrollbar-hide">
-          <div className="p-4 pb-20">
-            <div className={activeTab === 'text' ? 'space-y-5 flex flex-col' : 'hidden'}>
+        <div className={`flex-1 relative flex flex-col min-h-0 ${activeTab === 'text' ? 'lg:overflow-hidden' : 'lg:overflow-y-auto'}`}>
+          <div className="p-4 flex-1 flex flex-col min-h-0">
+            <div className={activeTab === 'text' ? 'flex-1 flex flex-col gap-5 min-h-0' : 'hidden'}>
               {/* Text Editor Section */}
-              <section>
-                <div className="relative">
+              <section className="flex-1 flex flex-col min-h-0">
+                <div className="relative flex-shrink-0">
                   {toast && (
                     <div className="absolute top-0 right-0 left-0 -mt-1 bg-blue-50 border border-brand-blue/30 text-brand-blue rounded-lg p-2 text-xs flex items-center justify-between shadow-sm animate-fade-in z-50 backdrop-blur-sm bg-blue-50/95 mb-2">
                       <span className="flex-1 pr-2 truncate">{toast.message}</span>
@@ -237,19 +237,21 @@ function SidebarSettings({ onOpenHelp }) {
                   )}
                 </div>
                 
-                <div className="border border-stone-200/50 bg-white rounded-xl shadow-sm relative flex flex-col mt-2">
-                  <div className="sticky top-0 z-10 bg-stone-50/95 backdrop-blur-sm p-3 flex flex-col gap-2 border-b border-stone-200/50 rounded-t-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                <div className="border border-stone-200/50 bg-white rounded-xl shadow-sm relative flex flex-col mt-2 flex-1 min-h-0">
+                  <div className="bg-stone-50/95 backdrop-blur-sm p-3 flex flex-col gap-2 border-b border-stone-200/50 rounded-t-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex-shrink-0">
                     <Toolbar 
                       editorRef={editorRef} 
                       onUpdate={handleInput} 
                       onClear={clearText}
+                      onUndo={undo}
+                      onRedo={redo}
                     />
                     <SmartMenu editorRef={editorRef} />
                   </div>
-                  <div className="p-3">
+                  <div className="p-3 flex-1 overflow-y-auto custom-scrollbar min-h-0">
                     <div 
                       ref={editorRef}
-                      className="min-h-[240px] max-h-[400px] overflow-y-auto outline-none whitespace-pre-wrap break-words custom-scrollbar" 
+                      className="min-h-[120px] outline-none whitespace-pre-wrap break-words" 
                       contentEditable 
                       suppressContentEditableWarning
                       onPaste={handlePaste}
@@ -265,7 +267,7 @@ function SidebarSettings({ onOpenHelp }) {
             </section>
 
             {/* Font Section */}
-            <section>
+            <section className="flex-shrink-0">
               <div className="text-sm font-medium text-stone-700 mb-2 uppercase tracking-wider text-xs">Шрифт</div>
               <div className="flex items-center gap-3 bg-stone-50/50 border border-stone-200/50 rounded-xl p-3">
                 <select 

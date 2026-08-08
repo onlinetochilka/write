@@ -50,7 +50,9 @@ export function getTextLines(editorEl) {
           const newUlColor = node.dataset?.ulColor || currentUlColor;
           const newMorph = node.dataset?.morph || currentMorph;
           const newMorphId = node.dataset?.morphId || currentMorphId;
-          const newBold = node.dataset?.bold === 'true' || currentBold;
+          let newBold = currentBold;
+          if (node.dataset?.bold === 'true') newBold = true;
+          else if (node.dataset?.bold === 'false') newBold = false;
           const newFont = node.dataset?.font || currentFont;
           const newFs = node.dataset?.fs ? parseFloat(node.dataset.fs) : currentFs;
           const newBase = node.dataset?.base === 'true' || currentBase;
