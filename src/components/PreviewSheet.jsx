@@ -132,7 +132,7 @@ function PreviewSheet() {
   };
 
   return (
-    <main className="preview-wrap">
+    <main className="preview-wrap max-lg:min-h-[85vh]">
       <style>{`@page { margin: 0; }`}</style>
       <div 
         id="previewSheet"

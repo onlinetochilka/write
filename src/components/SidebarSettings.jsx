@@ -153,9 +153,9 @@ function SidebarSettings({ onOpenHelp }) {
   }, []);
 
   return (
-    <div className="relative flex flex-col lg:h-full flex-1 lg:flex-none lg:flex-shrink-0 z-10 w-full lg:w-[clamp(380px,27vw,450px)] lg:min-w-[380px] min-h-0 print:hidden">
+    <div className="relative flex flex-col lg:h-full lg:flex-shrink-0 z-10 w-full lg:w-[clamp(380px,27vw,450px)] lg:min-w-[380px] print:hidden">
       <EditorSync editorRef={editorRef} />
-      <aside className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 flex flex-col h-full w-full relative z-[2] overflow-hidden">
+      <aside className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 flex flex-col lg:h-full w-full relative z-[2] lg:overflow-hidden">
         {/* Header */}
         <header className="flex items-center p-4 border-b border-stone-200/50">
           <img
@@ -219,7 +219,7 @@ function SidebarSettings({ onOpenHelp }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 pb-20 relative space-y-5 scrollbar-hide">
+        <div className="flex-1 lg:overflow-y-auto p-4 pb-20 relative space-y-5 scrollbar-hide">
           
           {activeTab === 'text' && (
             <>
