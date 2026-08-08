@@ -741,135 +741,57 @@ const InsertOptions = () => {
           </div>
         )}
         
-        <div className="text-xs text-stone-400 italic pt-4">
-          Кликните по пустому месту на листе, чтобы вернуться к выбору фигур.
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-200">
-      <div className="text-[11px] font-bold text-stone-500 mb-2 uppercase tracking-wider">Фигуры</div>
-      
-      <div className="grid grid-cols-2 gap-2">
-        <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('segment')}
-        >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="20" x2="20" y2="4" /><circle cx="4" cy="20" r="2" fill="currentColor"/><circle cx="20" cy="4" r="2" fill="currentColor"/></svg>
-          Отрезок
-        </button>
-        <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('dashed_segment')}
-        >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4"><line x1="4" y1="20" x2="20" y2="4" /><circle cx="4" cy="20" r="2" fill="currentColor"/><circle cx="20" cy="4" r="2" fill="currentColor"/></svg>
-          Пунктир
-        </button>
-        <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('triangle')}
-        >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12,4 4,20 20,20"/></svg>
-          Треугольник
-        </button>
-        <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('rectangle')}
-        >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="6" width="16" height="12"/></svg>
-          Прямоугольник
-        </button>
-        <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('coord_ray')}
-        >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="4" y1="12" x2="20" y2="12" /><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none" /><polyline points="15,8 20,12 15,16" /></svg>
-          Луч
-        </button>
-        <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('coord_line')}
-        >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="2" y1="12" x2="20" y2="12" /><polyline points="15,8 20,12 15,16" /></svg>
-          Коорд. прямая
-        </button>
-        <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('parallelogram')}
-        >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="6,18 10,6 22,6 18,18"/></svg>
-          Параллелограмм
-        </button>
-        <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('trapezoid')}
-        >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="4,18 8,6 16,6 20,18"/></svg>
-          Трапеция
-        </button>
-        <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('circle')}
-        >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
-          Окружность
-        </button>
-      </div>
-      
-      {selectedShape && selectedShape.type === 'circle' && (
-        <div className="space-y-4 pt-2">
-          <div>
-            <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Размер (мм)</div>
-            <input 
-              type="number" min="5" max="200"
-              className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
-              value={Math.round(selectedShape.width)}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value) || 10;
-                const updated = shapes.map(s => s.id === selectedShape.id ? { ...s, width: val, height: val } : s);
-                updateState({ shapes: updated });
-              }}
-            />
-          </div>
-          
-          <div className="pt-2 border-t border-stone-100">
-            <div className="text-[10px] font-bold text-stone-500 mb-2 uppercase">Геометрические построения</div>
-            <div className="flex items-center gap-3 mb-3">
+        {selectedShape && selectedShape.type === 'circle' && (
+          <div className="space-y-4 pt-2">
+            <div>
+              <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Размер (мм)</div>
               <input 
-                type="color" 
-                value={selectedShape.extraColor || '#3b82f6'}
-                className="w-6 h-6 p-0 border-0 rounded cursor-pointer overflow-hidden"
-                onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, extraColor: e.target.value } : s) })}
+                type="number" min="5" max="200"
+                className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
+                value={Math.round(selectedShape.width)}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value) || 10;
+                  const updated = shapes.map(s => s.id === selectedShape.id ? { ...s, width: val, height: val } : s);
+                  updateState({ shapes: updated });
+                }}
               />
-              <span className="text-[10px] text-stone-600">Цвет построений</span>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="flex items-center gap-2 text-[10px] text-stone-600 cursor-pointer">
+            
+            <div className="pt-2 border-t border-stone-100">
+              <div className="text-[10px] font-bold text-stone-500 mb-2 uppercase">Геометрические построения</div>
+              <div className="flex items-center gap-3 mb-3">
                 <input 
-                  type="checkbox"
-                  checked={selectedShape.showRadius || false}
-                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, showRadius: e.target.checked } : s) })}
-                  className="rounded border-stone-300 text-brand-blue focus:ring-brand-blue"
+                  type="color" 
+                  value={selectedShape.extraColor || '#3b82f6'}
+                  className="w-6 h-6 p-0 border-0 rounded cursor-pointer overflow-hidden"
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, extraColor: e.target.value } : s) })}
                 />
-                Радиус
-              </label>
-              <label className="flex items-center gap-2 text-[10px] text-stone-600 cursor-pointer">
-                <input 
-                  type="checkbox"
-                  checked={selectedShape.showTangent || false}
-                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, showTangent: e.target.checked } : s) })}
-                  className="rounded border-stone-300 text-brand-blue focus:ring-brand-blue"
-                />
-                Касательная
-              </label>
+                <span className="text-[10px] text-stone-600">Цвет построений</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="flex items-center gap-2 text-[10px] text-stone-600 cursor-pointer">
+                  <input 
+                    type="checkbox"
+                    checked={selectedShape.showRadius || false}
+                    onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, showRadius: e.target.checked } : s) })}
+                    className="rounded border-stone-300 text-brand-blue focus:ring-brand-blue"
+                  />
+                  Радиус
+                </label>
+                <label className="flex items-center gap-2 text-[10px] text-stone-600 cursor-pointer">
+                  <input 
+                    type="checkbox"
+                    checked={selectedShape.showTangent || false}
+                    onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, showTangent: e.target.checked } : s) })}
+                    className="rounded border-stone-300 text-brand-blue focus:ring-brand-blue"
+                  />
+                  Касательная
+                </label>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      
         {selectedShape && selectedShape.type === 'parallelogram' && (
           <div className="space-y-4 pt-2">
             <div className="flex gap-2 p-1 bg-stone-100 rounded-lg">
@@ -1133,296 +1055,85 @@ const InsertOptions = () => {
             </div>
           </div>
         )}
-
-        {selectedShape && selectedShape.type === 'circle' && (
-        <div className="space-y-4 pt-2">
-          <div>
-            <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Размер (мм)</div>
-            <input 
-              type="number" min="5" max="200"
-              className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
-              value={Math.round(selectedShape.width)}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value) || 10;
-                const updated = shapes.map(s => s.id === selectedShape.id ? { ...s, width: val, height: val } : s);
-                updateState({ shapes: updated });
-              }}
-            />
-          </div>
-          
-          <div className="pt-2 border-t border-stone-100">
-            <div className="text-[10px] font-bold text-stone-500 mb-2 uppercase">Геометрические построения</div>
-            <div className="flex items-center gap-3 mb-3">
-              <input 
-                type="color" 
-                value={selectedShape.extraColor || '#3b82f6'}
-                className="w-6 h-6 p-0 border-0 rounded cursor-pointer overflow-hidden"
-                onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, extraColor: e.target.value } : s) })}
-              />
-              <span className="text-[10px] text-stone-600">Цвет построений</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="flex items-center gap-2 text-[10px] text-stone-600 cursor-pointer">
-                <input 
-                  type="checkbox"
-                  checked={selectedShape.showRadius || false}
-                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, showRadius: e.target.checked } : s) })}
-                  className="rounded border-stone-300 text-brand-blue focus:ring-brand-blue"
-                />
-                Радиус
-              </label>
-              <label className="flex items-center gap-2 text-[10px] text-stone-600 cursor-pointer">
-                <input 
-                  type="checkbox"
-                  checked={selectedShape.showTangent || false}
-                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, showTangent: e.target.checked } : s) })}
-                  className="rounded border-stone-300 text-brand-blue focus:ring-brand-blue"
-                />
-                Касательная
-              </label>
-            </div>
-          </div>
+        
+        <div className="text-xs text-stone-400 italic pt-4">
+          Кликните по пустому месту на листе, чтобы вернуться к выбору фигур.
         </div>
-      )}
+      </section>
+    );
+  }
 
+  return (
+    <section className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-200">
+      <div className="text-[11px] font-bold text-stone-500 mb-2 uppercase tracking-wider">Фигуры</div>
       
-        {selectedShape && selectedShape.type === 'parallelogram' && (
-          <div className="space-y-4 pt-2">
-            <div className="flex gap-2 p-1 bg-stone-100 rounded-lg">
-              <button
-                className={`flex-1 py-1.5 px-2 text-[10px] font-medium rounded-md transition-all ${(selectedShape.parallelogramType || 'standard') === 'standard' ? 'bg-white text-brand-blue shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
-                onClick={() => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, parallelogramType: 'standard' } : s) })}
-              >
-                Параллелограмм
-              </button>
-              <button
-                className={`flex-1 py-1.5 px-2 text-[10px] font-medium rounded-md transition-all ${selectedShape.parallelogramType === 'rhombus' ? 'bg-white text-brand-blue shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
-                onClick={() => {
-                  const side = selectedShape.width || 100;
-                  updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, parallelogramType: 'rhombus', width: side, height: side * Math.sin((s.angle || 60) * Math.PI / 180) } : s) });
-                }}
-              >
-                Ромб
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <div className="text-[10px] text-stone-500 mb-1">{(selectedShape.parallelogramType === 'rhombus') ? 'Сторона' : 'Основание (a)'}</div>
-                <input 
-                  type="number" min="5" max="300"
-                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
-                  value={Math.round(selectedShape.width)}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value) || 50;
-                    if (selectedShape.parallelogramType === 'rhombus') {
-                      updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, width: val, height: val * Math.sin((s.angle || 60) * Math.PI / 180) } : s) });
-                    } else {
-                      updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, width: val } : s) });
-                    }
-                  }}
-                />
-              </div>
-              {selectedShape.parallelogramType !== 'rhombus' && (
-                <div>
-                  <div className="text-[10px] text-stone-500 mb-1">Высота (h)</div>
-                  <input 
-                    type="number" min="5" max="300"
-                    className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
-                    value={Math.round(selectedShape.height)}
-                    onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, height: parseFloat(e.target.value) || 50 } : s) })}
-                  />
-                </div>
-              )}
-              <div>
-                <div className="text-[10px] text-stone-500 mb-1">Угол (α)</div>
-                <input 
-                  type="number" min="10" max="170"
-                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
-                  value={Math.round(selectedShape.angle || 60)}
-                  onChange={(e) => {
-                     const val = parseFloat(e.target.value) || 60;
-                     if (selectedShape.parallelogramType === 'rhombus') {
-                        updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, angle: val, height: s.width * Math.sin(val * Math.PI / 180) } : s) });
-                     } else {
-                        updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, angle: val } : s) });
-                     }
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-stone-100">
-              <div className="text-[10px] font-bold text-stone-500 mb-2 uppercase">Геометрические построения</div>
-              <div className="flex items-center gap-3 mb-3">
-                <input 
-                  type="color" 
-                  value={selectedShape.extraColor || '#3b82f6'}
-                  className="w-6 h-6 p-0 border-0 rounded cursor-pointer overflow-hidden"
-                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, extraColor: e.target.value } : s) })}
-                />
-                <span className="text-[10px] text-stone-600">Цвет построений</span>
-              </div>
-              <div className="space-y-2">
-                {[
-                  { id: 'diagonals', label: 'Диагонали', options: ['1', '2'] },
-                  { id: 'altitudes', label: 'Высоты', options: ['A', 'B', 'C', 'D'] },
-                  { id: 'bisectors', label: 'Биссектрисы', options: ['A', 'B', 'C', 'D'] }
-                ].map(group => (
-                  <div key={group.id} className="flex items-center justify-between bg-stone-50 p-2 rounded">
-                    <span className="text-[10px] font-medium text-stone-600">{group.label}</span>
-                    <div className="flex gap-1">
-                      {group.options.map(opt => {
-                        const isActive = (selectedShape[group.id] || []).includes(opt);
-                        return (
-                          <button
-                            key={opt}
-                            className={`text-[9px] w-5 h-5 rounded flex items-center justify-center border ${isActive ? 'bg-brand-blue text-white border-brand-blue' : 'bg-white text-stone-400 border-stone-200 hover:bg-stone-50'}`}
-                            onClick={() => {
-                              const current = selectedShape[group.id] || [];
-                              const next = isActive ? current.filter(x => x !== opt) : [...current, opt];
-                              updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, [group.id]: next } : s) });
-                            }}
-                          >
-                            {opt}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))}
-                {selectedShape.parallelogramType === 'rhombus' && (
-                  <label className="flex items-center gap-2 text-[10px] text-stone-600 cursor-pointer pt-2">
-                    <input 
-                      type="checkbox"
-                      checked={selectedShape.showRightAngles !== false}
-                      onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, showRightAngles: e.target.checked } : s) })}
-                      className="rounded border-stone-300 text-brand-blue focus:ring-brand-blue"
-                    />
-                    Прямой угол диагоналей
-                  </label>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {selectedShape && selectedShape.type === 'trapezoid' && (
-          <div className="space-y-4 pt-2">
-            <div className="flex gap-2 p-1 bg-stone-100 rounded-lg">
-              <button
-                className={`flex-1 py-1.5 px-1 text-[9px] font-medium rounded-md transition-all ${(selectedShape.trapezoidType || 'standard') === 'standard' ? 'bg-white text-brand-blue shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
-                onClick={() => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, trapezoidType: 'standard' } : s) })}
-              >
-                Обычная
-              </button>
-              <button
-                className={`flex-1 py-1.5 px-1 text-[9px] font-medium rounded-md transition-all ${selectedShape.trapezoidType === 'isosceles' ? 'bg-white text-brand-blue shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
-                onClick={() => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, trapezoidType: 'isosceles' } : s) })}
-              >
-                Равнобедренная
-              </button>
-              <button
-                className={`flex-1 py-1.5 px-1 text-[9px] font-medium rounded-md transition-all ${selectedShape.trapezoidType === 'right' ? 'bg-white text-brand-blue shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
-                onClick={() => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, trapezoidType: 'right' } : s) })}
-              >
-                Прямоугольная
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <div className="text-[10px] text-stone-500 mb-1">Нижнее (a)</div>
-                <input 
-                  type="number" min="5" max="300"
-                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
-                  value={Math.round(selectedShape.width)}
-                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, width: parseFloat(e.target.value) || 100 } : s) })}
-                />
-              </div>
-              <div>
-                <div className="text-[10px] text-stone-500 mb-1">Верхнее (b)</div>
-                <input 
-                  type="number" min="5" max="300"
-                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
-                  value={Math.round(selectedShape.topWidth || 60)}
-                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, topWidth: parseFloat(e.target.value) || 60 } : s) })}
-                />
-              </div>
-              <div>
-                <div className="text-[10px] text-stone-500 mb-1">Высота (h)</div>
-                <input 
-                  type="number" min="5" max="300"
-                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
-                  value={Math.round(selectedShape.height)}
-                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, height: parseFloat(e.target.value) || 50 } : s) })}
-                />
-              </div>
-              {(selectedShape.trapezoidType || 'standard') === 'standard' && (
-                <div>
-                  <div className="text-[10px] text-stone-500 mb-1">Сдвиг (dx)</div>
-                  <input 
-                    type="number" min="0" max="200"
-                    className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
-                    value={Math.round(selectedShape.shift || 30)}
-                    onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, shift: parseFloat(e.target.value) || 0 } : s) })}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="pt-2 border-t border-stone-100">
-              <div className="text-[10px] font-bold text-stone-500 mb-2 uppercase">Геометрические построения</div>
-              <div className="flex items-center gap-3 mb-3">
-                <input 
-                  type="color" 
-                  value={selectedShape.extraColor || '#3b82f6'}
-                  className="w-6 h-6 p-0 border-0 rounded cursor-pointer overflow-hidden"
-                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, extraColor: e.target.value } : s) })}
-                />
-                <span className="text-[10px] text-stone-600">Цвет построений</span>
-              </div>
-              <div className="space-y-2">
-                {[
-                  { id: 'diagonals', label: 'Диагонали', options: ['1', '2'] }
-                ].map(group => (
-                  <div key={group.id} className="flex items-center justify-between bg-stone-50 p-2 rounded">
-                    <span className="text-[10px] font-medium text-stone-600">{group.label}</span>
-                    <div className="flex gap-1">
-                      {group.options.map(opt => {
-                        const isActive = (selectedShape[group.id] || []).includes(opt);
-                        return (
-                          <button
-                            key={opt}
-                            className={`text-[9px] w-5 h-5 rounded flex items-center justify-center border ${isActive ? 'bg-brand-blue text-white border-brand-blue' : 'bg-white text-stone-400 border-stone-200 hover:bg-stone-50'}`}
-                            onClick={() => {
-                              const current = selectedShape[group.id] || [];
-                              const next = isActive ? current.filter(x => x !== opt) : [...current, opt];
-                              updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, [group.id]: next } : s) });
-                            }}
-                          >
-                            {opt}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))}
-                <label className="flex items-center gap-2 text-[10px] text-stone-600 cursor-pointer pt-2">
-                  <input 
-                    type="checkbox"
-                    checked={selectedShape.showMidline || false}
-                    onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, showMidline: e.target.checked } : s) })}
-                    className="rounded border-stone-300 text-brand-blue focus:ring-brand-blue"
-                  />
-                  Средняя линия
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
-
-<div className="mt-4 p-3 bg-blue-50 text-brand-blue rounded-xl text-xs">
+      <div className="grid grid-cols-2 gap-2">
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
+          onClick={() => addShape('segment')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="20" x2="20" y2="4" /><circle cx="4" cy="20" r="2" fill="currentColor"/><circle cx="20" cy="4" r="2" fill="currentColor"/></svg>
+          Отрезок
+        </button>
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
+          onClick={() => addShape('dashed_segment')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4"><line x1="4" y1="20" x2="20" y2="4" /><circle cx="4" cy="20" r="2" fill="currentColor"/><circle cx="20" cy="4" r="2" fill="currentColor"/></svg>
+          Пунктир
+        </button>
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
+          onClick={() => addShape('triangle')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12,4 4,20 20,20"/></svg>
+          Треугольник
+        </button>
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
+          onClick={() => addShape('rectangle')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="6" width="16" height="12"/></svg>
+          Прямоугольник
+        </button>
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
+          onClick={() => addShape('coord_ray')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="4" y1="12" x2="20" y2="12" /><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none" /><polyline points="15,8 20,12 15,16" /></svg>
+          Луч
+        </button>
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
+          onClick={() => addShape('coord_line')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="2" y1="12" x2="20" y2="12" /><polyline points="15,8 20,12 15,16" /></svg>
+          Коорд. прямая
+        </button>
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
+          onClick={() => addShape('parallelogram')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="6,18 10,6 22,6 18,18"/></svg>
+          Параллелограмм
+        </button>
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
+          onClick={() => addShape('trapezoid')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="4,18 8,6 16,6 20,18"/></svg>
+          Трапеция
+        </button>
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
+          onClick={() => addShape('circle')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
+          Окружность
+        </button>
+      </div>
+      
+      <div className="mt-4 p-3 bg-blue-50 text-brand-blue rounded-xl text-xs">
         Выберите фигуру, чтобы добавить её на лист. Вы можете перетаскивать выделенную фигуру мышкой.
       </div>
     </section>

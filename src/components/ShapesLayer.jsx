@@ -721,6 +721,36 @@ const ShapesLayer = ({ W, H, svgRef }) => {
         vertices.push({ x: shape.width + 2, y: -2, align: 'start' }); // Top right
         vertices.push({ x: shape.width + 2, y: shape.height + 8, align: 'start' }); // Bottom right
         vertices.push({ x: -2, y: shape.height + 8, align: 'end' }); // Bottom left
+      } else if (shape.type === 'parallelogram') {
+        const angle = shape.angle || 60;
+        let shift = shape.height / Math.tan(angle * Math.PI / 180);
+        if (shape.parallelogramType === 'rhombus') {
+           shift = shape.width * Math.cos(angle * Math.PI / 180);
+        }
+        vertices.push({ x: shift - 2, y: -2, align: 'end' }); // Top left
+        vertices.push({ x: shift + shape.width + 2, y: -2, align: 'start' }); // Top right
+        vertices.push({ x: shape.width + 2, y: shape.height + 8, align: 'start' }); // Bottom right
+        vertices.push({ x: -2, y: shape.height + 8, align: 'end' }); // Bottom left
+      } else if (shape.type === 'trapezoid') {
+        const topWidth = shape.topWidth || 60;
+        let a1 = shape.angle1 || 60;
+        let a2 = shape.angle2 || 70;
+        if (shape.trapezoidType === 'right') a1 = 90;
+        else if (shape.trapezoidType === 'isosceles') a2 = a1;
+        const h = shape.height || 50;
+        const shift1 = a1 === 90 ? 0 : h / Math.tan(a1 * Math.PI / 180);
+        const shift2 = a2 === 90 ? 0 : h / Math.tan(a2 * Math.PI / 180);
+        const minX = Math.min(0, shift1);
+        const offsetX = -minX;
+        
+        vertices.push({ x: offsetX + shift1 - 2, y: -2, align: 'end' }); // Top left
+        vertices.push({ x: offsetX + shift1 + topWidth + 2, y: -2, align: 'start' }); // Top right
+        vertices.push({ x: offsetX + shift1 + topWidth + shift2 + 2, y: h + 8, align: 'start' }); // Bottom right
+        vertices.push({ x: offsetX - 2, y: h + 8, align: 'end' }); // Bottom left
+      } else if (shape.type === 'circle') {
+        const cx = shape.width / 2;
+        const cy = shape.height / 2;
+        vertices.push({ x: cx + 2, y: cy - 2, align: 'start' }); // Center
       }
       
       labelElements = labels.map((l, idx) => {
