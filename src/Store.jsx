@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { shallowEqual } from './utils/shallowEqual';
 
 const StoreContext = createContext();
-
-export const useStore = () => useContext(StoreContext);
 
 const initialState = {
   format: 'a4',
@@ -27,41 +26,42 @@ const initialState = {
 };
 
 export const StoreProvider = ({ children }) => {
-  const [state, setState] = useState(initialState);
+  const storeRef = useRef(initialState);
+  const listeners = useRef(new Set());
   
-  // History refs
   const past = useRef([]);
   const future = useRef([]);
-  const [historyVersion, setHistoryVersion] = useState(0);
-  const stateRef = useRef(initialState);
   const debounceTimer = useRef(null);
 
-  useEffect(() => {
-    stateRef.current = state;
-  }, [state]);
+  const subscribe = useCallback((listener) => {
+    listeners.current.add(listener);
+    return () => listeners.current.delete(listener);
+  }, []);
+
+  const getState = useCallback(() => storeRef.current, []);
+
+  const notify = () => {
+    listeners.current.forEach(l => l());
+  };
 
   const updateState = useCallback((updates) => {
-    // Clear future array on new actions
     if (future.current.length > 0) {
       future.current = [];
-      setHistoryVersion(v => v + 1);
     }
 
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     } else {
-      // First change after a period of rest. Save the CURRENT state to past BEFORE we apply the updates!
-      past.current.push(stateRef.current);
-      if (past.current.length > 50) past.current.shift(); // Keep max 50 items
-      setHistoryVersion(v => v + 1);
+      past.current.push(storeRef.current);
+      if (past.current.length > 50) past.current.shift();
     }
 
-    // Set a timer to close the current batch
     debounceTimer.current = setTimeout(() => {
       debounceTimer.current = null;
     }, 700);
 
-    setState(prev => ({ ...prev, ...updates }));
+    storeRef.current = { ...storeRef.current, ...updates };
+    notify();
   }, []);
 
   const undo = useCallback(() => {
@@ -73,10 +73,10 @@ export const StoreProvider = ({ children }) => {
     }
 
     const previousState = past.current.pop();
-    future.current.push(stateRef.current);
+    future.current.push(storeRef.current);
     
-    setState(previousState);
-    setHistoryVersion(v => v + 1);
+    storeRef.current = previousState;
+    notify();
   }, []);
 
   const redo = useCallback(() => {
@@ -88,16 +88,17 @@ export const StoreProvider = ({ children }) => {
     }
 
     const nextState = future.current.pop();
-    past.current.push(stateRef.current);
+    past.current.push(storeRef.current);
     
-    setState(nextState);
-    setHistoryVersion(v => v + 1);
+    storeRef.current = nextState;
+    notify();
   }, []);
 
-  // Global hotkeys for Undo/Redo
+  const getCanUndo = useCallback(() => past.current.length > 0, []);
+  const getCanRedo = useCallback(() => future.current.length > 0, []);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ignore if user is typing in an input field (so they can use native undo/redo for text)
       if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
       
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
@@ -118,18 +119,70 @@ export const StoreProvider = ({ children }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undo, redo]);
 
-  const contextValue = useMemo(() => ({ 
-    state, 
-    updateState, 
-    undo, 
-    redo, 
-    canUndo: past.current.length > 0, 
-    canRedo: future.current.length > 0 
-  }), [state, updateState, undo, redo, historyVersion]);
+  const value = useMemo(() => ({
+    subscribe,
+    getState,
+    updateState,
+    undo,
+    redo,
+    getCanUndo,
+    getCanRedo
+  }), [subscribe, getState, updateState, undo, redo, getCanUndo, getCanRedo]);
 
   return (
-    <StoreContext.Provider value={contextValue}>
+    <StoreContext.Provider value={value}>
       {children}
     </StoreContext.Provider>
   );
+};
+
+export const useStore = (selector) => {
+  const store = useContext(StoreContext);
+  if (!store) throw new Error('Missing StoreProvider');
+
+  const [state, setState] = useState(() => 
+    selector ? selector(store.getState()) : store.getState()
+  );
+  
+  const [canUndo, setCanUndo] = useState(store.getCanUndo());
+  const [canRedo, setCanRedo] = useState(store.getCanRedo());
+
+  const stateRef = useRef(state);
+  const selectorRef = useRef(selector);
+  selectorRef.current = selector;
+
+  useEffect(() => {
+    const checkUpdate = () => {
+      const nextCanUndo = store.getCanUndo();
+      const nextCanRedo = store.getCanRedo();
+      
+      setCanUndo(prev => prev !== nextCanUndo ? nextCanUndo : prev);
+      setCanRedo(prev => prev !== nextCanRedo ? nextCanRedo : prev);
+
+      const nextState = selectorRef.current 
+        ? selectorRef.current(store.getState()) 
+        : store.getState();
+
+      const isEqual = selectorRef.current 
+        ? shallowEqual(stateRef.current, nextState)
+        : stateRef.current === nextState;
+
+      if (!isEqual) {
+        stateRef.current = nextState;
+        setState(nextState);
+      }
+    };
+    
+    checkUpdate();
+    return store.subscribe(checkUpdate);
+  }, [store]);
+
+  return {
+    state,
+    updateState: store.updateState,
+    undo: store.undo,
+    redo: store.redo,
+    canUndo,
+    canRedo
+  };
 };

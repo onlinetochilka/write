@@ -11,7 +11,10 @@ const getMousePosition = (evt, svg) => {
 };
 
 const ShapesLayer = ({ W, H, svgRef }) => {
-  const { state, updateState } = useStore();
+  const { state, updateState } = useStore(s => ({
+    shapes: s.shapes,
+    selectedShapeId: s.selectedShapeId
+  }));
   const { shapes, selectedShapeId } = state;
   const [dragInfo, setDragInfo] = useState(null);
   

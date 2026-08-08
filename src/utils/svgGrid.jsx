@@ -20,7 +20,7 @@ export function buildGridGroup(W, H, gridType, margin) {
     lastY = y;
   }
 
-  if (gridType === 'squared' || gridType === 'large_squared') {
+  if (gridType === 'squared') {
     const step = cfg.step;
     for (let y = topOffset; y <= maxH + 0.05; y += step) {
       elements.push(<line key={`h${keyIdx++}`} x1={0} y1={r(y)} x2={W} y2={r(y)} stroke="#8A9EBC" strokeWidth={0.15} />);

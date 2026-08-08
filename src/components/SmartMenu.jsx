@@ -4,7 +4,7 @@ import { getTextLines } from '../utils/textParser';
 import { trackGoal } from '../utils/analytics';
 
 function SmartMenu({ editorRef }) {
-  const { updateState } = useStore();
+  const { updateState } = useStore(() => null);
 
   const applyStyle = (type, value) => {
     const sel = window.getSelection();

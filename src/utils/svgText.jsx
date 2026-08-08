@@ -87,7 +87,8 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
     const chunkFs = chunkObj?.fs || printFontSize;
     
     const isCursive = chunkFont === 'ClassRoomCursive';
-    let font = isCursive ? (LATIN_RE.test(textStr) ? 'ClassRoomCursive' : 'Propisi') : chunkFont;
+    let font = isCursive ? (LATIN_RE.test(textStr) ? "ClassRoomCursive, cursive" : "Propisi, cursive") : `${chunkFont}, sans-serif`;
+    let canvasFont = isCursive ? (LATIN_RE.test(textStr) ? "'ClassRoomCursive', cursive" : "'Propisi', cursive") : `'${chunkFont}', sans-serif`;
     let baseFontSize = isCursive ? fontSize : chunkFs;
     
     let digitFs = baseFontSize;
@@ -96,7 +97,8 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
       else if (cfg.step === 5) digitFs = fontSize * 0.65;
       else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
     }
-    let digitFamily = isCursive ? 'ClassRoomCursive' : chunkFont;
+    let digitFamily = isCursive ? "ClassRoomCursive, cursive" : `${chunkFont}, sans-serif`;
+    let canvasDigitFamily = isCursive ? "'ClassRoomCursive', cursive" : `'${chunkFont}', sans-serif`;
     let baseWeight = chunkObj?.bold ? 'bold' : 'normal';
     let digitWeight = chunkObj?.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
 
@@ -104,9 +106,9 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
     for (const part of parts) {
       if (!part) continue;
       if (/\d+/.test(part)) {
-         w += getMeasuredWidth(part, `${digitWeight} ${r(digitFs)}px '${digitFamily}'`);
+         w += getMeasuredWidth(part, `${digitWeight} ${r(digitFs)}px ${canvasDigitFamily}`);
       } else {
-         w += getMeasuredWidth(part.replace(/ /g, '\u00A0'), `${baseWeight} ${r(baseFontSize)}px '${font}'`);
+         w += getMeasuredWidth(part.replace(/ /g, '\u00A0'), `${baseWeight} ${r(baseFontSize)}px ${canvasFont}`);
       }
     }
     return w;
@@ -135,7 +137,7 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
         const chunkFs = chunkObj?.fs || printFontSize;
 
         const isCursive = chunkFont === 'ClassRoomCursive';
-        let font = isCursive ? (LATIN_RE.test(chunkStr) ? 'ClassRoomCursive' : 'Propisi') : chunkFont;
+        let font = isCursive ? (LATIN_RE.test(chunkStr) ? "ClassRoomCursive, cursive" : "Propisi, cursive") : `${chunkFont}, sans-serif`;
         
         let fontSz = isCursive ? fontSize : chunkFs;
         let digitFs = fontSz;
@@ -144,7 +146,7 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
           else if (cfg.step === 5) digitFs = fontSize * 0.65;
           else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
         }
-        let digitFamily = isCursive ? 'ClassRoomCursive' : chunkFont;
+        let digitFamily = isCursive ? "ClassRoomCursive, cursive" : `${chunkFont}, sans-serif`;
         let baseWeight = chunkObj.bold ? 'bold' : 'normal';
         let digitWeight = chunkObj.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
 
@@ -236,7 +238,7 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
 function renderNormalLines(W, H, cfg, margin, gridType, textLines, fill, topOffset, printFont, printFontSize) {
   const { fontSize, lineH, step } = cfg;
   const { startX, endX } = getTextBounds(margin, W);
-  let y = topOffset + ((gridType === 'squared' || gridType === 'large_squared') ? step * 2 : 0);
+  let y = topOffset + ((gridType === 'squared') ? step * 2 : 0);
   const allElements = [];
   let k = 0;
 
@@ -261,7 +263,8 @@ function renderNormalLines(W, H, cfg, margin, gridType, textLines, fill, topOffs
         const chunkFs = chunkObj?.fs || printFontSize;
         
         const isCursive = chunkFont === 'ClassRoomCursive';
-        let font = isCursive ? (LATIN_RE.test(textStr) ? 'ClassRoomCursive' : 'Propisi') : chunkFont;
+        let font = isCursive ? (LATIN_RE.test(textStr) ? "ClassRoomCursive, cursive" : "Propisi, cursive") : `${chunkFont}, sans-serif`;
+        let canvasFont = isCursive ? (LATIN_RE.test(textStr) ? "'ClassRoomCursive', cursive" : "'Propisi', cursive") : `'${chunkFont}', sans-serif`;
         
         let fontSz = isCursive ? fontSize : chunkFs;
         let digitFs = fontSz;
@@ -270,7 +273,8 @@ function renderNormalLines(W, H, cfg, margin, gridType, textLines, fill, topOffs
           else if (cfg.step === 5) digitFs = fontSize * 0.65;
           else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
         }
-        let digitFamily = isCursive ? 'ClassRoomCursive' : chunkFont;
+        let digitFamily = isCursive ? "ClassRoomCursive, cursive" : `${chunkFont}, sans-serif`;
+        let canvasDigitFamily = isCursive ? "'ClassRoomCursive', cursive" : `'${chunkFont}', sans-serif`;
         let baseWeight = chunkObj.bold ? 'bold' : 'normal';
         let digitWeight = chunkObj.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
 
@@ -278,9 +282,9 @@ function renderNormalLines(W, H, cfg, margin, gridType, textLines, fill, topOffs
         for (const part of parts) {
           if (!part) continue;
           if (/\d+/.test(part)) {
-             totalW += getMeasuredWidth(part, `${digitWeight} ${r(digitFs)}px '${digitFamily}'`);
+             totalW += getMeasuredWidth(part, `${digitWeight} ${r(digitFs)}px ${canvasDigitFamily}`);
           } else {
-             totalW += getMeasuredWidth(part.replace(/ /g, '\u00A0'), `${baseWeight} ${r(fontSz)}px '${font}'`);
+             totalW += getMeasuredWidth(part.replace(/ /g, '\u00A0'), `${baseWeight} ${r(fontSz)}px ${canvasFont}`);
           }
         }
       });
@@ -311,7 +315,7 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
   startX = redLineX + Math.ceil(offset) * step;
 
   const cols = Math.floor((endX - startX) / step);
-  let rowY = topOffset + ((gridType === 'squared' || gridType === 'large_squared') ? step * 2 : step);
+  let rowY = topOffset + ((gridType === 'squared') ? step * 2 : step);
   const isCursive = printFont === 'ClassRoomCursive';
   
   const allElements = [];
@@ -396,7 +400,7 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
           key: `mtxt${lIdx}_${col}`,
           x: cx,
           y: r(rowY),
-          fontFamily: isCursive ? 'ClassRoomCursive' : chunkFont,
+          fontFamily: isCursive ? "ClassRoomCursive, cursive" : `${chunkFont}, sans-serif`,
           fontSize: r(digitFs),
           fontWeight: weight,
           fill: chColor,
@@ -404,7 +408,8 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
           text: chStr
         });
 
-        const wText = getMeasuredWidth(chStr.replace(/ /g, '\u00A0'), `${weight} ${r(digitFs)}px '${isCursive ? 'ClassRoomCursive' : chunkFont}'`);
+        const canvasFont = isCursive ? "'ClassRoomCursive', cursive" : `'${chunkFont}', sans-serif`;
+        const wText = getMeasuredWidth(chStr.replace(/ /g, '\u00A0'), `${weight} ${r(digitFs)}px ${canvasFont}`);
         allElements.push(...getDecorations(chunkObj, cx - wText/2, rowY, wText, fontSize, lineH, fill, `mdec${lIdx}_${col}`));
 
         col++;
@@ -483,10 +488,11 @@ export function buildTextGroup(W, H, gridType, mode, mathMode, margin, textLines
   const maxH = H - bottomOffset;
 
   let elements = [];
-  if (gridType === 'large_squared' || (gridType === 'squared' && mathMode)) {
+  if ((gridType === 'squared' && mathMode)) {
     elements = renderMathLines(W, maxH, cfg, margin, gridType, textLines, fill, topOffset, printFont, printFontSize);
   } else {
     elements = renderNormalLines(W, maxH, cfg, margin, gridType, textLines, fill, topOffset, printFont, printFontSize);
   }
-  return <g id="svgText" key={`${gridType}-${mode}-${mathMode}`}>{renderDataElements(elements)}</g>;
+  const uniqueId = `svgText_${Math.random().toString(36).substring(7)}`;
+  return <g id={uniqueId} key={`${gridType}-${mode}-${mathMode}`}>{renderDataElements(elements)}</g>;
 }

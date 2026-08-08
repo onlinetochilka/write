@@ -2,7 +2,10 @@ import React from 'react';
 import { useStore } from '../../Store';
 
 const InsertOptions = () => {
-  const { state, updateState } = useStore();
+  const { state, updateState } = useStore(s => ({
+    shapes: s.shapes,
+    selectedShapeId: s.selectedShapeId
+  }));
   const { shapes, selectedShapeId } = state;
   
   const selectedShape = shapes.find(s => s.id === selectedShapeId);

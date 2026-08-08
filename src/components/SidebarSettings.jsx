@@ -8,6 +8,8 @@ import GridOptions from './SidebarSettings/GridOptions';
 import ModeSelector from './SidebarSettings/ModeSelector';
 import PageSettings from './SidebarSettings/PageSettings';
 import InsertOptions from './SidebarSettings/InsertOptions';
+import { applyStyleToSelection } from '../utils/textFormatting';
+import { PAPER_DIMS } from '../utils/constants';
 
 const MemoizedOptions = React.memo(({ 
   format, orientation, grid, mode, layout, mathMode, margin, mirrorMargins, updateState 
@@ -28,8 +30,30 @@ const MemoizedOptions = React.memo(({
   );
 });
 
+const EditorSync = ({ editorRef }) => {
+  const { state: editorHtml } = useStore(s => s.editorHtml);
+  useEffect(() => {
+    if (editorRef.current && editorHtml !== undefined && editorRef.current.innerHTML !== editorHtml) {
+      editorRef.current.innerHTML = editorHtml;
+    }
+  }, [editorHtml, editorRef]);
+  return null;
+};
+
 function SidebarSettings({ onOpenHelp }) {
-  const { state, updateState, undo, redo, canUndo, canRedo } = useStore();
+  const { state, updateState, undo, redo, canUndo, canRedo } = useStore(s => ({
+    format: s.format,
+    orientation: s.orientation,
+    grid: s.grid,
+    mode: s.mode,
+    layout: s.layout,
+    mathMode: s.mathMode,
+    margin: s.margin,
+    mirrorMargins: s.mirrorMargins,
+    printFont: s.printFont,
+    printFontSize: s.printFontSize,
+    shapes: s.shapes
+  }));
   const editorRef = useRef(null);
 
   const handleInput = () => {
@@ -55,20 +79,56 @@ function SidebarSettings({ onOpenHelp }) {
   };
 
   const handleUpdateState = (newState) => {
+    let finalState = { ...newState };
+
+    if ((newState.format && newState.format !== state.format) || 
+        (newState.orientation && newState.orientation !== state.orientation)) {
+      
+      const hasShapes = state.shapes && state.shapes.length > 0;
+      if (hasShapes) {
+        const confirmScale = window.confirm("При изменении формата или ориентации листа вы можете пропорционально изменить размер нарисованных фигур. Масштабировать фигуры?\n\nОК - пропорционально уменьшить/увеличить\nОтмена - оставить абсолютные размеры");
+        
+        if (confirmScale) {
+          const oldFormat = state.format;
+          const oldOrientation = state.orientation;
+          const oldB = PAPER_DIMS[oldFormat] || PAPER_DIMS.a4;
+          const oldW = oldOrientation === 'landscape' ? oldB.h : oldB.w;
+          const oldH = oldOrientation === 'landscape' ? oldB.w : oldB.h;
+
+          const newFormat = newState.format || state.format;
+          const newOrientation = newState.orientation || state.orientation;
+          const newB = PAPER_DIMS[newFormat] || PAPER_DIMS.a4;
+          const newW = newOrientation === 'landscape' ? newB.h : newB.w;
+          const newH = newOrientation === 'landscape' ? newB.w : newB.h;
+
+          const scaleX = newW / oldW;
+          const scaleY = newH / oldH;
+          const scaleMin = Math.min(scaleX, scaleY);
+
+          finalState.shapes = state.shapes.map(shape => ({
+            ...shape,
+            x: shape.x * scaleX,
+            y: shape.y * scaleY,
+            width: shape.width * scaleX,
+            ...(shape.height !== undefined ? { height: shape.height * scaleY } : {}),
+            ...(shape.fontSize !== undefined ? { fontSize: shape.fontSize * scaleMin } : {})
+          }));
+        }
+      }
+    }
+
     if (newState.grid !== undefined && editorRef.current) {
       const DEF_CURSIVE = 'Аа Бб Вв 1 2 3 4 5Пишу красиво и легко.С Точилкой всё сходится!';
       const DEF_PRINT = 'А Б В 1 2 3 4 5ПИШУ КРАСИВО.';
       
       const cleanText = editorRef.current.innerText.replace(/\s+/g, '');
       if (cleanText === DEF_CURSIVE.replace(/\s+/g, '') || cleanText === DEF_PRINT.replace(/\s+/g, '')) {
-          editorRef.current.innerHTML = (newState.grid === 'large_squared') 
-              ? '<div>А Б В 1 2 3 4 5</div><div><br></div><div>ПИШУ КРАСИВО.</div>' 
-              : '<div>Аа Бб Вв 1 2 3 4 5</div><div><br></div><div>Пишу красиво и легко.</div><div><br></div><div>С Точилкой всё сходится!</div>';
+          editorRef.current.innerHTML = '<div>Аа Бб Вв 1 2 3 4 5</div><div><br></div><div>Пишу красиво и легко.</div><div><br></div><div>С Точилкой всё сходится!</div>';
           
           newState.textLines = getTextLines(editorRef.current);
       }
     }
-    updateState(newState);
+    updateState(finalState);
   };
 
   const [toast, setToast] = useState(null);
@@ -81,74 +141,7 @@ function SidebarSettings({ onOpenHelp }) {
   };
 
   const applyInlineStyle = (type, value) => {
-    const sel = window.getSelection();
-    if (!sel.rangeCount || sel.isCollapsed) return false;
-    
-    const range = sel.getRangeAt(0);
-    if (!editorRef.current.contains(range.commonAncestorContainer)) return false;
-
-    const closestSpan = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE 
-        ? range.commonAncestorContainer.closest('span') 
-        : range.commonAncestorContainer.parentElement?.closest('span');
-    
-    let currentSpan = closestSpan;
-    let inherited = { morph: null, ul: null, color: null, morphId: null, bold: null, font: null, fs: null, base: null, baseId: null };
-    while (currentSpan && currentSpan.tagName === 'SPAN') {
-        if (!inherited.morph && currentSpan.dataset.morph) {
-            inherited.morph = currentSpan.dataset.morph;
-            inherited.morphId = currentSpan.dataset.morphId;
-        }
-        if (!inherited.base && currentSpan.dataset.base) {
-            inherited.base = currentSpan.dataset.base;
-            inherited.baseId = currentSpan.dataset.baseId;
-        }
-        if (!inherited.ul && currentSpan.dataset.ul) inherited.ul = currentSpan.dataset.ul;
-        if (!inherited.color && currentSpan.dataset.color) inherited.color = currentSpan.dataset.color;
-        if (!inherited.bold && currentSpan.dataset.bold) inherited.bold = currentSpan.dataset.bold;
-        if (!inherited.font && currentSpan.dataset.font) inherited.font = currentSpan.dataset.font;
-        if (!inherited.fs && currentSpan.dataset.fs) inherited.fs = currentSpan.dataset.fs;
-        currentSpan = currentSpan.parentElement.closest('span');
-    }
-
-    const targetSpan = document.createElement('span');
-
-    if (inherited.ul) targetSpan.dataset.ul = inherited.ul;
-    if (inherited.morph) {
-        targetSpan.dataset.morph = inherited.morph;
-        if (inherited.morphId) targetSpan.dataset.morphId = inherited.morphId;
-    }
-    if (inherited.base) {
-        targetSpan.dataset.base = inherited.base;
-        if (inherited.baseId) targetSpan.dataset.baseId = inherited.baseId;
-    }
-    if (inherited.color) {
-        targetSpan.dataset.color = inherited.color;
-        targetSpan.style.color = inherited.color;
-    }
-    if (inherited.bold && inherited.bold !== 'false') {
-        targetSpan.dataset.bold = inherited.bold;
-        targetSpan.style.fontWeight = 'bold';
-    }
-    if (inherited.font) targetSpan.dataset.font = inherited.font;
-    if (inherited.fs) targetSpan.dataset.fs = inherited.fs;
-
-    if (type === 'font') targetSpan.dataset.font = value;
-    if (type === 'fs') targetSpan.dataset.fs = value;
-
-    try {
-      const fragment = range.extractContents();
-      const innerSpans = fragment.querySelectorAll('span');
-      innerSpans.forEach(span => {
-          if (type === 'font') span.dataset.font = value;
-          if (type === 'fs') span.dataset.fs = value;
-      });
-      targetSpan.appendChild(fragment);
-      range.insertNode(targetSpan);
-    } catch (e) {
-      return false;
-    }
-    handleInput();
-    return true;
+    return applyStyleToSelection(editorRef, type, value, handleInput);
   };
 
   const [activeTab, setActiveTab] = useState('text'); // 'text' | 'list'
@@ -158,15 +151,10 @@ function SidebarSettings({ onOpenHelp }) {
       editorRef.current.innerHTML = '<div>Аа Бб Вв 1 2 3 4 5</div><div><br></div><div>Пишу красиво и легко.</div><div><br></div><div>С Точилкой всё сходится!</div>';
     }
   }, []);
-  useEffect(() => {
-    if (editorRef.current && state.editorHtml !== undefined && editorRef.current.innerHTML !== state.editorHtml) {
-      editorRef.current.innerHTML = state.editorHtml;
-    }
-  }, [state.editorHtml]);
-
 
   return (
-    <div className="relative flex h-full flex-shrink-0 z-10 w-[clamp(380px,27vw,450px)] min-w-[380px]">
+    <div className="relative flex flex-col lg:h-full flex-1 lg:flex-none lg:flex-shrink-0 z-10 w-full lg:w-[clamp(380px,27vw,450px)] lg:min-w-[380px] min-h-0 print:hidden">
+      <EditorSync editorRef={editorRef} />
       <aside className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 flex flex-col h-full w-full relative z-[2] overflow-hidden">
         {/* Header */}
         <header className="flex items-center p-4 border-b border-stone-200/50">

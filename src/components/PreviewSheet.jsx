@@ -9,13 +9,26 @@ const MemoizedGrid = memo(({ W, H, grid, margin }) => {
   return buildGridGroup(W, H, grid, margin);
 });
 
-const MemoizedText = memo(({ W, H, grid, mode, mathMode, margin, textLines, printFont, printFontSize }) => {
+const ConnectedTextGroup = memo(({ W, H, grid, mode, mathMode, margin, printFont, printFontSize }) => {
+  const { state: textLines } = useStore(s => s.textLines);
   return buildTextGroup(W, H, grid, mode, mathMode, margin, textLines, printFont, printFontSize);
 });
 
 function PreviewSheet() {
-  const { state, updateState } = useStore();
-  const { format, orientation, grid, mode, layout, mathMode, margin, mirrorMargins, textLines, printFont, printFontSize, shapes } = state;
+  const { state, updateState } = useStore(s => ({
+    format: s.format,
+    orientation: s.orientation,
+    grid: s.grid,
+    mode: s.mode,
+    layout: s.layout,
+    mathMode: s.mathMode,
+    margin: s.margin,
+    mirrorMargins: s.mirrorMargins,
+    printFont: s.printFont,
+    printFontSize: s.printFontSize,
+    shapes: s.shapes
+  }));
+  const { format, orientation, grid, mode, layout, mathMode, margin, mirrorMargins, printFont, printFontSize, shapes } = state;
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -101,20 +114,26 @@ function PreviewSheet() {
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox={`0 0 ${W} ${H}`}
-        style={{ width: isDouble ? '50%' : '100%', height: '100%' }}
+        style={{ 
+          width: isDouble ? '50%' : '100%', 
+          height: '100%',
+          position: 'absolute',
+          left: isClone ? '50%' : '0',
+          top: 0
+        }}
         preserveAspectRatio="xMidYMid meet"
         role="img"
       >
         <rect x={0} y={0} width={W} height={H} fill="#ffffff" />
         <MemoizedGrid W={W} H={H} grid={grid} margin={currentMargin} />
-        <MemoizedText W={W} H={H} grid={grid} mode={mode} mathMode={mathMode} margin={currentMargin} textLines={textLines} printFont={printFont} printFontSize={printFontSize} />
+        <ConnectedTextGroup W={W} H={H} grid={grid} mode={mode} mathMode={mathMode} margin={currentMargin} printFont={printFont} printFontSize={printFontSize} />
       </svg>
     );
   };
 
   return (
     <main className="preview-wrap">
-      <style>{`@page { size: ${isLandscape ? 'landscape' : 'portrait'}; margin: 0; }`}</style>
+      <style>{`@page { margin: 0; }`}</style>
       <div 
         id="previewSheet"
         className="a4-sheet print-page relative"
