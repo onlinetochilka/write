@@ -1,0 +1,108 @@
+/* =========================================
+   TOCHILKA UI KIT - PREMIUM SOFT UI
+   ========================================= */
+
+:root {
+    /* Базовая палитра */
+    --bg-color: #e0e5ec; 
+    --shadow-light: #ffffff; 
+    --shadow-dark: #b8c2d1; 
+    
+    /* Фирменные цвета */
+    --brand-red: #B71234; 
+    --brand-teal: #006584; 
+    --color-rest: #4CAF50;
+    
+    /* Текст */
+    --text-main: #2d3436; 
+    --text-muted: #747d8c;
+
+    /* Библиотека теней (Неоморфизм) */
+    --shadow-sm: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+    --shadow-sm-inset: inset 3px 3px 8px var(--shadow-dark), inset -3px -3px 8px var(--shadow-light);
+    --shadow-md: 6px 6px 16px var(--shadow-dark), -6px -6px 16px var(--shadow-light);
+    --shadow-md-inset: inset 5px 5px 12px var(--shadow-dark), inset -5px -5px 12px var(--shadow-light);
+    --shadow-lg: 14px 14px 36px var(--shadow-dark), -14px -14px 36px var(--shadow-light);
+    --shadow-lg-inset: inset 10px 10px 24px var(--shadow-dark), inset -10px -10px 24px var(--shadow-light);
+    --shadow-xl: 20px 20px 60px var(--shadow-dark), -20px -20px 60px var(--shadow-light);
+}
+
+/* --- БАЗОВЫЕ НАСТРОЙКИ --- */
+body.tochilka-theme {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- КАРТОЧКИ (Основа интерфейса) --- */
+.neumo-card {
+    background: var(--bg-color);
+    border-radius: 40px;
+    padding: 40px;
+    box-shadow: var(--shadow-xl);
+}
+
+/* --- КНОПКИ --- */
+/* Стандартная выпуклая кнопка */
+.neumo-btn {
+    background: var(--bg-color);
+    color: var(--text-muted);
+    border: none;
+    padding: 14px 24px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.neumo-btn:hover {
+    color: var(--text-main);
+}
+
+/* Вдавленная (активная) кнопка */
+.neumo-btn:active, .neumo-btn.active {
+    box-shadow: var(--shadow-md-inset);
+    color: var(--brand-teal);
+}
+
+/* Главная акцентная кнопка (Красная) */
+.neumo-btn-primary {
+    background: var(--brand-red);
+    color: #ffffff;
+    border: none;
+    padding: 16px 28px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 8px 8px 24px rgba(183, 18, 52, 0.35), -8px -8px 20px var(--shadow-light);
+    transition: all 0.3s ease;
+}
+
+.neumo-btn-primary:active {
+    background: var(--brand-teal);
+    box-shadow: inset 6px 6px 14px rgba(0, 0, 0, 0.25), inset -4px -4px 10px rgba(255, 255, 255, 0.15);
+}
+
+/* --- ПОЛЯ ВВОДА (Input / Textarea) --- */
+.neumo-input {
+    background: var(--bg-color);
+    border: none;
+    padding: 14px 20px;
+    border-radius: 14px;
+    color: var(--brand-teal);
+    font-size: 1rem;
+    font-weight: 600;
+    outline: none;
+    box-shadow: var(--shadow-sm-inset);
+    width: 100%;
+}
+
+.neumo-input::placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
+}
