@@ -29,12 +29,15 @@ const MemoizedOptions = React.memo(({
 });
 
 function SidebarSettings({ onOpenHelp }) {
-  const { state, updateState } = useStore();
+  const { state, updateState, undo, redo, canUndo, canRedo } = useStore();
   const editorRef = useRef(null);
 
   const handleInput = () => {
     if (editorRef.current) {
-      updateState({ textLines: getTextLines(editorRef.current) });
+      updateState({ 
+        textLines: getTextLines(editorRef.current),
+        editorHtml: editorRef.current.innerHTML
+      });
     }
   };
 
@@ -155,6 +158,12 @@ function SidebarSettings({ onOpenHelp }) {
       editorRef.current.innerHTML = '<div>Аа Бб Вв 1 2 3 4 5</div><div><br></div><div>Пишу красиво и легко.</div><div><br></div><div>С Точилкой всё сходится!</div>';
     }
   }, []);
+  useEffect(() => {
+    if (editorRef.current && state.editorHtml !== undefined && editorRef.current.innerHTML !== state.editorHtml) {
+      editorRef.current.innerHTML = state.editorHtml;
+    }
+  }, [state.editorHtml]);
+
 
   return (
     <div className="relative flex h-full flex-shrink-0 z-10 w-[clamp(380px,27vw,450px)] min-w-[380px]">
@@ -168,11 +177,35 @@ function SidebarSettings({ onOpenHelp }) {
           />
           <div>
             <h1 className="text-base font-semibold text-stone-900 leading-snug">Идеальная тетрадь</h1>
-            <div className="text-xs font-medium text-stone-500">Создавайте прописи и образцы</div>
+            <div className="text-xs font-medium text-stone-500 flex gap-2 items-center">
+              <span>Создавайте прописи и образцы</span>
+            </div>
           </div>
-          <button onClick={() => { trackGoal('help_opened'); onOpenHelp(); }} className="ml-auto w-8 h-8 flex items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors">
-            ?
-          </button>
+          
+          <div className="ml-auto flex items-center gap-1">
+            <button 
+              onClick={undo} 
+              disabled={!canUndo}
+              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${canUndo ? 'bg-stone-100 text-stone-700 hover:bg-stone-200' : 'bg-transparent text-stone-300'}`} 
+              title="Отменить действие (Ctrl+Z)"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+            </button>
+            <button 
+              onClick={redo} 
+              disabled={!canRedo}
+              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${canRedo ? 'bg-stone-100 text-stone-700 hover:bg-stone-200' : 'bg-transparent text-stone-300'}`} 
+              title="Вернуть действие (Ctrl+Y)"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
+            </button>
+            
+            <div className="w-px h-5 bg-stone-200 mx-1"></div>
+            
+            <button onClick={() => { trackGoal('help_opened'); onOpenHelp(); }} className="w-8 h-8 flex items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors">
+              ?
+            </button>
+          </div>
         </header>
 
         {/* Tabs */}
