@@ -20,7 +20,10 @@ function SmartMenu({ editorRef }) {
     range.collapse(true);
     sel.removeAllRanges();
     sel.addRange(range);
-    updateState({ textLines: getTextLines(editorRef.current) });
+    updateState({ 
+      textLines: getTextLines(editorRef.current),
+      editorHtml: editorRef.current.innerHTML
+    });
   };
 
   const applyStyle = (type, value) => {
@@ -136,7 +139,10 @@ function SmartMenu({ editorRef }) {
         return;
     }
 
-    updateState({ textLines: getTextLines(editorRef.current) });
+    updateState({ 
+      textLines: getTextLines(editorRef.current),
+      editorHtml: editorRef.current.innerHTML
+    });
   };
 
   return (

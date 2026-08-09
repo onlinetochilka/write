@@ -9,7 +9,7 @@ const MemoizedGrid = memo(({ W, H, grid, margin }) => {
   return buildGridGroup(W, H, grid, margin);
 });
 
-const ConnectedTextGroup = memo(({ W, H, grid, mode, mathMode, margin, printFont, printFontSize }) => {
+const ConnectedTextGroup = memo(({ W, H, grid, mode, mathMode, margin, printFont, printFontSize, fontsLoaded }) => {
   const { state: textLines } = useStore(s => s.textLines);
   return buildTextGroup(W, H, grid, mode, mathMode, margin, textLines, printFont, printFontSize);
 });
@@ -30,6 +30,13 @@ function PreviewSheet() {
   }));
   const { format, orientation, grid, mode, layout, mathMode, margin, mirrorMargins, printFont, printFontSize, shapes } = state;
   const svgRef = useRef(null);
+  const [fontsLoaded, setFontsLoaded] = React.useState(false);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined' && document.fonts) {
+      document.fonts.ready.then(() => setFontsLoaded(true));
+    }
+  }, []);
 
   useEffect(() => {
     const handlePaste = (e) => {
@@ -126,7 +133,7 @@ function PreviewSheet() {
       >
         <rect x={0} y={0} width={W} height={H} fill="#ffffff" />
         <MemoizedGrid W={W} H={H} grid={grid} margin={currentMargin} />
-        <ConnectedTextGroup W={W} H={H} grid={grid} mode={mode} mathMode={mathMode} margin={currentMargin} printFont={printFont} printFontSize={printFontSize} />
+        <ConnectedTextGroup W={W} H={H} grid={grid} mode={mode} mathMode={mathMode} margin={currentMargin} printFont={printFont} printFontSize={printFontSize} fontsLoaded={fontsLoaded} />
       </svg>
     );
   };

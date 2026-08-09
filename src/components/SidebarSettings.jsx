@@ -125,7 +125,8 @@ function SidebarSettings({ onOpenHelp }) {
       if (cleanText === DEF_CURSIVE.replace(/\s+/g, '') || cleanText === DEF_PRINT.replace(/\s+/g, '')) {
           editorRef.current.innerHTML = '<div>Аа Бб Вв 1 2 3 4 5</div><div><br></div><div>Пишу красиво и легко.</div><div><br></div><div>С Точилкой всё сходится!</div>';
           
-          newState.textLines = getTextLines(editorRef.current);
+          finalState.textLines = getTextLines(editorRef.current);
+          finalState.editorHtml = editorRef.current.innerHTML;
       }
     }
     updateState(finalState);

@@ -24,7 +24,7 @@ export function getTextBounds(margin, W) {
   }
 }
 
-function getDecorations(chunk, x, y, decWidth, fontSize, lineH, fill, keyPrefix, isBaseStart = true, isBaseEnd = true) {
+function createDecorationNodes(chunk, x, y, decWidth, fontSize, lineH, fill, keyPrefix, isBaseStart = true, isBaseEnd = true) {
   const elements = [];
   let k = 0;
   if (chunk.ul && chunk.ul !== 'none') {
@@ -34,11 +34,11 @@ function getDecorations(chunk, x, y, decWidth, fontSize, lineH, fill, keyPrefix,
       elements.push({ type: 'line', key: `${keyPrefix}_ul${k++}`, x1: r(x), y1: r(uy), x2: r(x + decWidth), y2: r(uy), stroke: ulC, strokeWidth: 0.3 });
     } else if (chunk.ul === 'double') {
       elements.push({ type: 'line', key: `${keyPrefix}_ul${k++}`, x1: r(x), y1: r(uy), x2: r(x + decWidth), y2: r(uy), stroke: ulC, strokeWidth: 0.3 });
-      elements.push({ type: 'line', key: `${keyPrefix}_ul${k++}`, x1: r(x), y1: r(uy + 3), x2: r(x + decWidth), y2: r(uy + 3), stroke: ulC, strokeWidth: 0.3 });
+      elements.push({ type: 'line', key: `${keyPrefix}_ul${k++}`, x1: r(x), y1: r(uy + 1.5), x2: r(x + decWidth), y2: r(uy + 1.5), stroke: ulC, strokeWidth: 0.3 });
     } else if (chunk.ul === 'dashed') {
       elements.push({ type: 'line', key: `${keyPrefix}_ul${k++}`, x1: r(x), y1: r(uy), x2: r(x + decWidth), y2: r(uy), stroke: ulC, strokeWidth: 0.3, strokeDasharray: "4 3" });
     } else if (chunk.ul === 'dotdash') {
-      elements.push({ type: 'line', key: `${keyPrefix}_ul${k++}`, x1: r(x), y1: r(uy), x2: r(x + decWidth), y2: r(uy), stroke: ulC, strokeWidth: 0.3, strokeDasharray: "8 3 2 3" });
+      elements.push({ type: 'line', key: `${keyPrefix}_ul${k++}`, x1: r(x), y1: r(uy), x2: r(x + decWidth), y2: r(uy), stroke: ulC, strokeWidth: 0.3, strokeDasharray: "4 2 1 2" });
     } else if (chunk.ul === 'wavy') {
       let d = `M ${r(x)} ${r(uy)}`;
       let up = true;
@@ -124,10 +124,10 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
       if (!part) continue;
       if (/\d+/.test(part)) {
          const fontStr = `${measureDigitWeight} ${r(digitFs)}px ${canvasDigitFamily}`;
-         w += getMeasuredWidth('.' + part + '.', fontStr) - getMeasuredWidth('..', fontStr);
+         w += getMeasuredWidth(part, fontStr);
       } else {
          const fontStr = `${measureBaseWeight} ${r(fontSz)}px ${canvasFont}`;
-         w += getMeasuredWidth('.' + part + '.', fontStr) - getMeasuredWidth('..', fontStr);
+         w += getMeasuredWidth(part, fontStr);
       }
     }
     return w;
@@ -270,7 +270,7 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
 
         const trimmedText = accText.trimEnd();
         const decWidth = measureMixedText(trimmedText, chunkObj);
-        elements.push(...getDecorations(chunkObj, currentX, yPos, decWidth, fontSize, lineH, fill, `${kPfx}_dec${k++}`, isBaseStart, isBaseEnd));
+        elements.push(...createDecorationNodes(chunkObj, currentX, yPos, decWidth, fontSize, lineH, fill, `${kPfx}_dec${k++}`, isBaseStart, isBaseEnd));
         
         if (chunkObj.base) {
            activeBaseId = chunkObj.baseId;
@@ -394,7 +394,7 @@ function renderNormalLines(W, H, cfg, margin, gridType, textLines, fill, topOffs
              totalW += getMeasuredWidth(part, `${measureDigitWeight} ${r(digitFs)}px ${canvasDigitFamily}`);
           } else {
              const fontStr = `${measureBaseWeight} ${r(fontSz)}px ${canvasFont}`;
-             totalW += getMeasuredWidth('.' + part + '.', fontStr) - getMeasuredWidth('..', fontStr);
+             totalW += getMeasuredWidth(part, fontStr);
           }
         }
       });
@@ -520,8 +520,8 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
 
         const canvasFont = isCursive ? "'ClassRoomCursive', cursive" : `'${chunkFont}', sans-serif`;
         const fontStr = `${weight} ${r(digitFs)}px ${canvasFont}`;
-        const wText = getMeasuredWidth('.' + chStr + '.', fontStr) - getMeasuredWidth('..', fontStr);
-        allElements.push(...getDecorations(chunkObj, cx - wText/2, rowY, wText, fontSize, lineH, fill, `mdec${lIdx}_${col}`));
+        const wText = getMeasuredWidth(chStr, fontStr);
+        allElements.push(...createDecorationNodes(chunkObj, cx - wText/2, rowY, wText, fontSize, lineH, fill, `mdec${lIdx}_${col}`));
 
         col++;
         i++;
@@ -559,9 +559,92 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
   return allElements;
 }
 
+// ========================================================================= //
+// ZONE 1: RENDERING (ОТРИСОВКА СИМВОЛОВ)
+// Если нужно поправить внешний вид ударения, дуги корня или подчеркивания - 
+// редактируйте функции в этой зоне. Не трогайте Layout!
+// ========================================================================= //
+
+function RenderDecoration({ node }) {
+  const { kind, subtype, x, y, decWidth, fontSize, isBaseStart, isBaseEnd } = node;
+  
+  if (kind === 'ul') {
+    const ulC = '#4a4a4a';
+    const uy = y + 2;
+    if (subtype === 'solid') {
+      return <line x1={r(x)} y1={r(uy)} x2={r(x + decWidth)} y2={r(uy)} stroke={ulC} strokeWidth={0.3} />;
+    } else if (subtype === 'double') {
+      return (
+        <g>
+          <line x1={r(x)} y1={r(uy)} x2={r(x + decWidth)} y2={r(uy)} stroke={ulC} strokeWidth={0.3} />
+          <line x1={r(x)} y1={r(uy + 1.5)} x2={r(x + decWidth)} y2={r(uy + 1.5)} stroke={ulC} strokeWidth={0.3} />
+        </g>
+      );
+    } else if (subtype === 'dashed') {
+      return <line x1={r(x)} y1={r(uy)} x2={r(x + decWidth)} y2={r(uy)} stroke={ulC} strokeWidth={0.3} strokeDasharray="4 3" />;
+    } else if (subtype === 'dotdash') {
+      return <line x1={r(x)} y1={r(uy)} x2={r(x + decWidth)} y2={r(uy)} stroke={ulC} strokeWidth={0.3} strokeDasharray="4 2 1 2" />;
+    } else if (subtype === 'wavy') {
+      let d = `M ${r(x)} ${r(uy)}`;
+      let up = true;
+      for (let cx = x; cx < x + decWidth; cx += 3) {
+        const nx = Math.min(cx + 3, x + decWidth);
+        const cy = up ? uy - 1.5 : uy + 1.5;
+        d += ` Q ${r(cx + 1.5)} ${r(cy)} ${r(nx)} ${r(uy)}`;
+        up = !up;
+      }
+      return <path d={d} stroke={ulC} strokeWidth={0.3} fill="none" />;
+    }
+  }
+
+  if (kind === 'morph') {
+    const mC = '#2e7d32';
+    const mSw = 0.3;
+    const letterH = fontSize * 0.35;
+    const baseY = y - letterH - (fontSize * 0.08); 
+    const markH = fontSize * 0.25; 
+    const topY = baseY - markH;
+
+    if (subtype === 'prefix') {
+      const prefixMarkH = fontSize * 0.12; 
+      const pTopY = baseY - prefixMarkH;
+      const d = `M ${r(x)} ${r(pTopY)} L ${r(x + decWidth)} ${r(pTopY)} L ${r(x + decWidth)} ${r(baseY)}`;
+      return <path d={d} stroke={mC} strokeWidth={mSw} fill="none" />;
+    } else if (subtype === 'root') {
+      const d = `M ${r(x)} ${r(baseY)} Q ${r(x + decWidth / 2)} ${r(topY)} ${r(x + decWidth)} ${r(baseY)}`;
+      return <path d={d} stroke={mC} strokeWidth={mSw} fill="none" />;
+    } else if (subtype === 'suffix') {
+      const d = `M ${r(x)} ${r(baseY)} L ${r(x + decWidth / 2)} ${r(topY)} L ${r(x + decWidth)} ${r(baseY)}`;
+      return <path d={d} stroke={mC} strokeWidth={mSw} fill="none" />;
+    } else if (subtype === 'ending') {
+      const boxH = letterH + fontSize * 0.15;
+      const rectH = boxH + fontSize * 0.15;
+      return <rect x={r(x)} y={r(y - boxH)} width={r(decWidth)} height={r(rectH)} stroke={mC} strokeWidth={mSw} fill="none" />;
+    }
+  }
+
+  if (kind === 'base') {
+    const mC = '#2e7d32';
+    let d = '';
+    if (isBaseStart) d += `M ${r(x)} ${r(y)} L ${r(x)} ${r(y + 4)} `;
+    else d += `M ${r(x)} ${r(y + 4)} `;
+    d += `L ${r(x + decWidth)} ${r(y + 4)} `;
+    if (isBaseEnd) d += `L ${r(x + decWidth)} ${r(y)}`;
+    return <path d={d} stroke={mC} strokeWidth={0.3} fill="none" />;
+  }
+  return null;
+}
+
+// ========================================================================= //
+// ZONE 2: LAYOUT (НЕ ТРОГАТЬ ПРИ ПРАВКЕ СИМВОЛОВ)
+// Здесь производятся расчеты координат x, y, перенос строк и генерация узлов.
+// ========================================================================= //
+
 function renderDataElements(dataElements) {
   return dataElements.map((el) => {
-    if (el.type === 'line') {
+    if (el.type === 'decoration') {
+      return <RenderDecoration key={el.key} node={el} />;
+    } else if (el.type === 'line') {
       return <line key={el.key} x1={el.x1} y1={el.y1} x2={el.x2} y2={el.y2} stroke={el.stroke} strokeWidth={el.strokeWidth} strokeDasharray={el.strokeDasharray} />;
     } else if (el.type === 'path') {
       return <path key={el.key} d={el.d} stroke={el.stroke} strokeWidth={el.strokeWidth} fill={el.fill} />;
