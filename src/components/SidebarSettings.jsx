@@ -175,7 +175,7 @@ function SidebarSettings({ onOpenHelp }) {
             <button 
               onClick={undo} 
               disabled={!canUndo}
-              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${canUndo ? 'bg-stone-100 text-stone-700 hover:bg-stone-200' : 'bg-transparent text-stone-300'}`} 
+              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${canUndo ? 'bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600' : 'bg-transparent text-stone-300'}`} 
               title="Отменить действие (Ctrl+Z)"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
@@ -183,7 +183,7 @@ function SidebarSettings({ onOpenHelp }) {
             <button 
               onClick={redo} 
               disabled={!canRedo}
-              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${canRedo ? 'bg-stone-100 text-stone-700 hover:bg-stone-200' : 'bg-transparent text-stone-300'}`} 
+              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${canRedo ? 'bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600' : 'bg-transparent text-stone-300'}`} 
               title="Вернуть действие (Ctrl+Y)"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
@@ -238,11 +238,12 @@ function SidebarSettings({ onOpenHelp }) {
                     />
                     <SmartMenu editorRef={editorRef} />
                   </div>
-                  <div className="p-3 flex-1 overflow-y-auto custom-scrollbar min-h-0">
+                  <div className="p-3 flex-1 overflow-y-auto custom-scrollbar min-h-0 bg-[#FDFBF7]/80 backdrop-blur-sm rounded-b-xl border border-black/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus-within:ring-1 focus-within:ring-[#1D3557]/20 focus-within:border-[#1D3557]/30 transition-colors text-[#1D3557]">
                     <div 
                       ref={editorRef}
                       className="min-h-[120px] outline-none whitespace-pre-wrap break-words" 
-                      contentEditable 
+                      contentEditable
+                      spellCheck={false}
                       suppressContentEditableWarning
                       onPaste={handlePaste}
                       onInput={handleInput}

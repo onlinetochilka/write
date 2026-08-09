@@ -933,7 +933,7 @@ const ShapesLayer = ({ W, H, svgRef }) => {
     return (
       <g 
         key={shape.id} 
-        transform={`translate(${shape.x}, ${shape.y}) rotate(${shape.rotation || 0})`}
+        transform={`translate(${shape.x}, ${shape.y}) rotate(${shape.rotation || 0} ${shape.width / 2} ${(shape.height || 0) / 2})`}
         onPointerDown={(e) => handlePointerDown(e, shape.id)}
         style={{ cursor: isSelected ? 'move' : 'pointer' }}
       >
@@ -951,36 +951,37 @@ const ShapesLayer = ({ W, H, svgRef }) => {
         {isSelected && (
           <g className="no-print">
             <rect 
-              x={-4} y={-4} 
-              width={shape.width + 8} height={(shape.height || 0) + 8} 
+              x={-5} y={-5} 
+              width={shape.width + 10} height={(shape.height || 0) + 10} 
               fill="none" 
               stroke="#0ea5e9" 
-              strokeWidth="1.5" 
-              strokeDasharray="4 4"
+              strokeWidth="1" 
+              strokeDasharray="3 3"
+              rx="3"
             />
             {/* Resize handle (bottom right) */}
             <circle 
-              cx={shape.width + 4} cy={(shape.height || 0) + 4} 
-              r="4" 
+              cx={shape.width + 5} cy={(shape.height || 0) + 5} 
+              r="3.5" 
               fill="#ffffff" 
               stroke="#0ea5e9" 
-              strokeWidth="1.5"
+              strokeWidth="1.2"
               style={{ cursor: 'nwse-resize' }}
               onPointerDown={(e) => handleResizeDown(e, shape)}
             />
             {/* Rotation handle (top center) */}
             <line 
-              x1={shape.width / 2} y1={-4} 
+              x1={shape.width / 2} y1={-5} 
               x2={shape.width / 2} y2={-20} 
               stroke="#0ea5e9" 
               strokeWidth="1"
             />
             <circle 
               cx={shape.width / 2} cy={-20} 
-              r="4" 
+              r="3.5" 
               fill="#ffffff" 
               stroke="#10b981" 
-              strokeWidth="1.5"
+              strokeWidth="1.2"
               style={{ cursor: 'crosshair' }}
               onPointerDown={(e) => handleRotateDown(e, shape)}
             />

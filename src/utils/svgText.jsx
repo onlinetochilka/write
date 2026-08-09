@@ -83,10 +83,11 @@ function createDecorationNodes(chunk, x, y, decWidth, fontSize, lineH, fill, key
   if (chunk.base) {
     const mC = '#2e7d32'; // Фиксированный зеленый цвет для морфологии
     let d = '';
-    if (isBaseStart) d += `M ${r(x)} ${r(y)} L ${r(x)} ${r(y + 4)} `;
-    else d += `M ${r(x)} ${r(y + 4)} `;
+    const baseDrop = 2;
+    if (isBaseStart) d += `M ${r(x)} ${r(y)} L ${r(x)} ${r(y + baseDrop)} `;
+    else d += `M ${r(x)} ${r(y + baseDrop)} `;
     
-    d += `L ${r(x + decWidth)} ${r(y + 4)} `;
+    d += `L ${r(x + decWidth)} ${r(y + baseDrop)} `;
     
     if (isBaseEnd) d += `L ${r(x + decWidth)} ${r(y)}`;
     

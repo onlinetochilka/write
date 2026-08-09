@@ -77,10 +77,10 @@ function Toolbar({ editorRef, onUpdate, onClear, onUndo, onRedo }) {
 
   return (
     <div className="flex items-center gap-1 border-b border-stone-200/50 pb-2">
-      <button onMouseDown={(e) => e.preventDefault()} onClick={handleUndo} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200" title="Отменить">
+      <button onMouseDown={(e) => e.preventDefault()} onClick={handleUndo} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors" title="Отменить">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
       </button>
-      <button onMouseDown={(e) => e.preventDefault()} onClick={handleRedo} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200" title="Повторить">
+      <button onMouseDown={(e) => e.preventDefault()} onClick={handleRedo} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors" title="Повторить">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
       </button>
       <div className="w-px h-5 bg-stone-200 mx-1"></div>
@@ -95,18 +95,18 @@ function Toolbar({ editorRef, onUpdate, onClear, onUndo, onRedo }) {
 
       <div className="w-px h-5 bg-stone-200 mx-1"></div>
 
-      <button onMouseDown={(e) => e.preventDefault()} onClick={toggleBold} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-bold font-serif text-sm">Ж</button>
+      <button onMouseDown={(e) => e.preventDefault()} onClick={toggleBold} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold font-serif text-sm">Ж</button>
 
       <div className="w-px h-5 bg-stone-200 mx-1"></div>
 
       <div className="flex gap-0.5">
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => toggleAlign('left')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200">
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => toggleAlign('left')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="15" y1="12" x2="3" y2="12"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
         </button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => toggleAlign('center')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200">
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => toggleAlign('center')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="19" y1="12" x2="5" y2="12"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg>
         </button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => toggleAlign('right')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200">
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => toggleAlign('right')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="12" x2="9" y2="12"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg>
         </button>
       </div>
@@ -117,7 +117,7 @@ function Toolbar({ editorRef, onUpdate, onClear, onUndo, onRedo }) {
         onMouseDown={(e) => e.preventDefault()} 
         onClick={onClear} 
         title="Очистить форматирование"
-        className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200"
+        className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="3 6 5 6 21 6"></polyline>

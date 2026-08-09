@@ -148,11 +148,11 @@ function SmartMenu({ editorRef }) {
   return (
     <div className="flex items-center gap-1">
       <div className="flex items-center gap-0.5">
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'solid')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-bold text-xs" title="подлежащее"><span className="border-b-2 border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'double')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-bold text-xs" title="сказуемое"><span className="border-b-[3px] border-double border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'dashed')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-bold text-xs" title="дополнение"><span className="border-b-2 border-dashed border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'wavy')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-bold text-xs" title="определение"><span className="underline decoration-wavy underline-offset-2 decoration-[1.5px] pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'dotdash')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200" title="обстоятельство">
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'solid')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs" title="подлежащее"><span className="border-b-2 border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'double')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs" title="сказуемое"><span className="border-b-[3px] border-double border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'dashed')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs" title="дополнение"><span className="border-b-2 border-dashed border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'wavy')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs" title="определение"><span className="underline decoration-wavy underline-offset-2 decoration-[1.5px] pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'dotdash')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors" title="обстоятельство">
           <svg width="16" height="1.5" viewBox="0 0 16 1.5" fill="currentColor" className="translate-y-[8px]">
             <rect x="0" y="0" width="5" height="1.5" />
             <rect x="7" y="0" width="2" height="1.5" />
@@ -164,11 +164,11 @@ function SmartMenu({ editorRef }) {
       <div className="w-px h-5 bg-stone-200 mx-1"></div>
       
       <div className="flex items-center gap-0.5">
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'prefix')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-medium font-serif text-sm" title="приставка">¬</button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'root')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-medium font-serif text-sm" title="корень">⌒</button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'suffix')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-medium font-serif text-sm" title="суффикс">^</button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'ending')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 font-medium font-serif text-sm" title="окончание">□</button>
-        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('base', 'toggle')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200" title="основа">
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'prefix')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-medium font-serif text-sm" title="приставка">¬</button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'root')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-medium font-serif text-sm" title="корень">⌒</button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'suffix')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-medium font-serif text-sm" title="суффикс">^</button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'ending')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-medium font-serif text-sm" title="окончание">□</button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('base', 'toggle')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors" title="основа">
           <svg width="14" height="6" viewBox="0 0 14 6" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="translate-y-[5px]">
             <path d="M1 1v4h12V1" />
           </svg>
@@ -177,7 +177,7 @@ function SmartMenu({ editorRef }) {
 
       <div className="w-px h-5 bg-stone-200 mx-1 ml-auto"></div>
       
-      <button onMouseDown={(e) => e.preventDefault()} onClick={addAccent} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 text-sm font-medium">´</button>
+      <button onMouseDown={(e) => e.preventDefault()} onClick={addAccent} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium">´</button>
     </div>
   );
 }
