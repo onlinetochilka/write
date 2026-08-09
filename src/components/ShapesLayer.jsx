@@ -17,6 +17,8 @@ const ShapesLayer = ({ W, H, svgRef }) => {
   }));
   const { shapes, selectedShapeId } = state;
   const [dragInfo, setDragInfo] = useState(null);
+  const [localShapes, _setLocalShapes] = useState(null);
+  const localShapesRef = React.useRef(null);
   
   // Handle start dragging a shape
   const handlePointerDown = useCallback((e, id) => {
@@ -28,7 +30,12 @@ const ShapesLayer = ({ W, H, svgRef }) => {
     
     const svg = svgRef.current;
     const pt = getMousePosition(e, svg);
-    const shape = shapes.find(s => s.id === id);
+    
+    const currentShapes = localShapesRef.current || shapes;
+    const shape = currentShapes.find(s => s.id === id);
+    
+    localShapesRef.current = currentShapes;
+    _setLocalShapes(currentShapes);
     
     setDragInfo({
       id,
@@ -47,6 +54,10 @@ const ShapesLayer = ({ W, H, svgRef }) => {
     const svg = svgRef.current;
     const pt = getMousePosition(e, svg);
     
+    const currentShapes = localShapesRef.current || shapes;
+    localShapesRef.current = currentShapes;
+    _setLocalShapes(currentShapes);
+    
     setDragInfo({
       id: shape.id,
       startX: pt.x,
@@ -57,7 +68,7 @@ const ShapesLayer = ({ W, H, svgRef }) => {
       initialHeight: shape.height || 0,
       mode: 'resize'
     });
-  }, [svgRef]);
+  }, [svgRef, shapes]);
 
   const handleRotateDown = useCallback((e, shape) => {
     e.stopPropagation();
@@ -69,6 +80,10 @@ const ShapesLayer = ({ W, H, svgRef }) => {
     const cx = shape.x + shape.width / 2;
     const cy = shape.y + (shape.height || 0) / 2;
     
+    const currentShapes = localShapesRef.current || shapes;
+    localShapesRef.current = currentShapes;
+    _setLocalShapes(currentShapes);
+    
     setDragInfo({
       id: shape.id,
       startX: pt.x,
@@ -77,7 +92,7 @@ const ShapesLayer = ({ W, H, svgRef }) => {
       initialRotation: shape.rotation || 0,
       mode: 'rotate'
     });
-  }, [svgRef]);
+  }, [svgRef, shapes]);
 
   // Handle global move
   const handlePointerMove = useCallback((e) => {
@@ -86,45 +101,54 @@ const ShapesLayer = ({ W, H, svgRef }) => {
     const svg = svgRef.current;
     const pt = getMousePosition(e, svg);
     
-    const updatedShapes = shapes.map(s => {
-      if (s.id === dragInfo.id) {
-        if (dragInfo.mode === 'drag') {
-          const dx = pt.x - dragInfo.startX;
-          const dy = pt.y - dragInfo.startY;
-          return {
-            ...s,
-            x: dragInfo.initialShapeX + dx,
-            y: dragInfo.initialShapeY + dy
-          };
-        } else if (dragInfo.mode === 'resize') {
-          const dx = pt.x - dragInfo.startX;
-          const dy = pt.y - dragInfo.startY;
-          return {
-            ...s,
-            width: Math.max(10, dragInfo.initialWidth + dx),
-            height: Math.max(10, dragInfo.initialHeight + dy)
-          };
-        } else if (dragInfo.mode === 'rotate') {
-          // Calculate angle
-          const angle1 = Math.atan2(dragInfo.startY - dragInfo.cy, dragInfo.startX - dragInfo.cx);
-          const angle2 = Math.atan2(pt.y - dragInfo.cy, pt.x - dragInfo.cx);
-          let deltaAngle = (angle2 - angle1) * (180 / Math.PI);
-          return {
-            ...s,
-            rotation: (dragInfo.initialRotation + deltaAngle)
-          };
+    _setLocalShapes(prev => {
+      const currentShapes = prev || shapes;
+      const updatedShapes = currentShapes.map(s => {
+        if (s.id === dragInfo.id) {
+          if (dragInfo.mode === 'drag') {
+            const dx = pt.x - dragInfo.startX;
+            const dy = pt.y - dragInfo.startY;
+            return {
+              ...s,
+              x: dragInfo.initialShapeX + dx,
+              y: dragInfo.initialShapeY + dy
+            };
+          } else if (dragInfo.mode === 'resize') {
+            const dx = pt.x - dragInfo.startX;
+            const dy = pt.y - dragInfo.startY;
+            return {
+              ...s,
+              width: Math.max(10, dragInfo.initialWidth + dx),
+              height: Math.max(10, dragInfo.initialHeight + dy)
+            };
+          } else if (dragInfo.mode === 'rotate') {
+            // Calculate angle
+            const angle1 = Math.atan2(dragInfo.startY - dragInfo.cy, dragInfo.startX - dragInfo.cx);
+            const angle2 = Math.atan2(pt.y - dragInfo.cy, pt.x - dragInfo.cx);
+            let deltaAngle = (angle2 - angle1) * (180 / Math.PI);
+            return {
+              ...s,
+              rotation: (dragInfo.initialRotation + deltaAngle)
+            };
+          }
         }
-      }
-      return s;
+        return s;
+      });
+      
+      localShapesRef.current = updatedShapes;
+      return updatedShapes;
     });
-    
-    updateState({ shapes: updatedShapes });
-  }, [dragInfo, svgRef, shapes, updateState]);
+  }, [dragInfo, svgRef, shapes]);
 
   // Handle global up
   const handlePointerUp = useCallback(() => {
     setDragInfo(null);
-  }, []);
+    if (localShapesRef.current) {
+      updateState({ shapes: localShapesRef.current });
+      localShapesRef.current = null;
+      _setLocalShapes(null);
+    }
+  }, [updateState]);
 
   // Global event listeners for smooth dragging outside the shape
   useEffect(() => {
@@ -968,7 +992,7 @@ const ShapesLayer = ({ W, H, svgRef }) => {
 
   return (
     <g className="shapes-layer">
-      {shapes.map(renderShape)}
+      {(localShapes || shapes).map(renderShape)}
     </g>
   );
 };
