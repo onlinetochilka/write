@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StoreProvider } from './Store';
+import { UIProvider } from './providers/UIProvider';
 import Layout from './components/Layout';
 import SidebarSettings from './components/SidebarSettings';
 import PreviewSheet from './components/PreviewSheet';
@@ -20,13 +21,15 @@ function App() {
   }
 
   return (
-    <StoreProvider>
-      <Layout>
+    <UIProvider>
+      <StoreProvider>
+        <Layout>
         <SidebarSettings onOpenHelp={() => setHelpOpen(true)} />
         <PreviewSheet />
       </Layout>
       <HelpModal isOpen={isHelpOpen} onClose={() => setHelpOpen(false)} />
-    </StoreProvider>
+      </StoreProvider>
+    </UIProvider>
   );
 }
 

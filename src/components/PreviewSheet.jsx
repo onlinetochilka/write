@@ -1,5 +1,6 @@
 import React, { memo, useRef, useEffect } from 'react';
 import { useStore } from '../Store';
+import { useUI } from '../providers/UIProvider';
 import { PAPER_DIMS } from '../utils/constants';
 import { buildGridGroup } from '../utils/svgGrid';
 import { buildTextGroup } from '../utils/svgText';
@@ -15,6 +16,7 @@ const ConnectedTextGroup = memo(({ W, H, grid, mode, mathMode, margin, printFont
 });
 
 function PreviewSheet() {
+  const { showAlert } = useUI();
   const { state, updateState } = useStore(s => ({
     format: s.format,
     orientation: s.orientation,
@@ -49,7 +51,11 @@ function PreviewSheet() {
       if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
         if (isTableData && text.split('\n').length > 1 && text.includes('\t')) {
           e.preventDefault();
-          alert('Внимание: Вы пытаетесь вставить целую таблицу внутрь одной ячейки.\n\nДля создания новой таблицы кликните по пустому месту на листе, чтобы снять выделение с текстового поля, и нажмите Ctrl+V еще раз.');
+          showAlert({
+            title: 'Внимание',
+            message: 'Вы пытаетесь вставить целую таблицу внутрь одной ячейки.\n\nДля создания новой таблицы кликните по пустому месту на листе, чтобы снять выделение с текстового поля, и нажмите Ctrl+V еще раз.',
+            type: 'warning'
+          });
         }
         return;
       }

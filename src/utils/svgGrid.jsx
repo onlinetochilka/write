@@ -11,6 +11,15 @@ export function buildGridGroup(W, H, gridType, margin) {
   const elements = [];
   let keyIdx = 0;
 
+  if (gridType === 'none') {
+    if (margin === 'left') {
+      elements.push(<line key="m_left" x1={20} y1={0} x2={20} y2={H} stroke="#EF4444" strokeWidth={0.30} />);
+    } else if (margin === 'right') {
+      elements.push(<line key="m_right" x1={r(W - 20)} y1={0} x2={r(W - 20)} y2={H} stroke="#EF4444" strokeWidth={0.30} />);
+    }
+    return <g id="svgGrid" key={gridType} aria-hidden="true">{elements}</g>;
+  }
+
   const cfg = GRID_CFG[gridType] || GRID_CFG.narrow;
   const { topOffset, bottomOffset } = getGridOffsets(gridType);
   const maxH = H - bottomOffset;

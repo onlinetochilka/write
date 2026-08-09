@@ -108,6 +108,7 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
     if (isCursive && cfg) {
       if (cfg.hasHelper) digitFs = fontSize * 0.60;
       else if (cfg.step === 5) digitFs = fontSize * 0.65;
+      else if (cfg.step === 8.00) digitFs = fontSize * 0.65;
       else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
     }
 
@@ -147,6 +148,7 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
     if (isCursive && cfg) {
       if (cfg.hasHelper) digitFs = fontSize * 0.60;
       else if (cfg.step === 5) digitFs = fontSize * 0.65;
+      else if (cfg.step === 8.00) digitFs = fontSize * 0.65;
       else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
     }
     let canvasDigitFamily = isCursive ? "'ClassRoomCursive', cursive" : `'${chunkFont}', sans-serif`;
@@ -203,6 +205,7 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
       if (isCursive && cfg) {
         if (cfg.hasHelper) digitFs = fontSize * 0.60;
         else if (cfg.step === 5) digitFs = fontSize * 0.65;
+        else if (cfg.step === 8.00) digitFs = fontSize * 0.65;
         else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
       }
       let digitFamily = isCursive ? "ClassRoomCursive, cursive" : `${chunkFont}, sans-serif`;
@@ -378,6 +381,7 @@ function renderNormalLines(W, H, cfg, margin, gridType, textLines, fill, topOffs
         if (isCursive && cfg) {
           if (cfg.hasHelper) digitFs = fontSize * 0.60;
           else if (cfg.step === 5) digitFs = fontSize * 0.65;
+          else if (cfg.step === 8.00) digitFs = fontSize * 0.65;
           else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
         }
         let digitFamily = isCursive ? "ClassRoomCursive, cursive" : `${chunkFont}, sans-serif`;
@@ -502,6 +506,7 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
         if (isCursive && cfg) {
           if (cfg.hasHelper) digitFs = fontSize * 0.60;
           else if (cfg.step === 5) digitFs = fontSize * 0.65;
+          else if (cfg.step === 8.00) digitFs = fontSize * 0.65;
           else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
         }
 

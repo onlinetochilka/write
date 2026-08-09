@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Toolbar from './Toolbar';
 import { useStore } from '../Store';
+import { useUI } from '../providers/UIProvider';
+import { Tooltip } from './ui/Tooltip';
 import { getTextLines } from '../utils/textParser';
 import SmartMenu from './SmartMenu';
 import { trackGoal } from '../utils/analytics';
@@ -41,19 +43,9 @@ const EditorSync = ({ editorRef }) => {
 };
 
 function SidebarSettings({ onOpenHelp }) {
-  const { state, updateState, undo, redo, canUndo, canRedo } = useStore(s => ({
-    format: s.format,
-    orientation: s.orientation,
-    grid: s.grid,
-    mode: s.mode,
-    layout: s.layout,
-    mathMode: s.mathMode,
-    margin: s.margin,
-    mirrorMargins: s.mirrorMargins,
-    printFont: s.printFont,
-    printFontSize: s.printFontSize,
-    shapes: s.shapes
-  }));
+  const { state, updateState, undo, redo, canUndo, canRedo } = useStore();
+  const { showConfirm, showAlert, showToast } = useUI();
+  const [activeTab, setActiveTab] = useState('text');
   const editorRef = useRef(null);
 
   const handleInput = () => {
@@ -65,11 +57,21 @@ function SidebarSettings({ onOpenHelp }) {
     }
   };
 
-  const clearText = () => {
-    if (editorRef.current) {
-      editorRef.current.innerHTML = editorRef.current.innerHTML.replace(/<\/?span[^>]*>/g, '');
-      handleInput();
-    }
+  const handleClearText = () => {
+    let savedState = {
+      html: editorRef.current.innerHTML,
+      lines: state.textLines
+    };
+    
+    editorRef.current.innerHTML = '<div><br></div>';
+    handleInput();
+
+    showToast('Текст очищен', () => {
+      if (editorRef.current) {
+        editorRef.current.innerHTML = savedState.html;
+        handleInput();
+      }
+    });
   };
 
   const handlePaste = (e) => {
@@ -78,45 +80,7 @@ function SidebarSettings({ onOpenHelp }) {
     document.execCommand('insertText', false, txt);
   };
 
-  const handleUpdateState = (newState) => {
-    let finalState = { ...newState };
-
-    if ((newState.format && newState.format !== state.format) || 
-        (newState.orientation && newState.orientation !== state.orientation)) {
-      
-      const hasShapes = state.shapes && state.shapes.length > 0;
-      if (hasShapes) {
-        const confirmScale = window.confirm("При изменении формата или ориентации листа вы можете пропорционально изменить размер нарисованных фигур. Масштабировать фигуры?\n\nОК - пропорционально уменьшить/увеличить\nОтмена - оставить абсолютные размеры");
-        
-        if (confirmScale) {
-          const oldFormat = state.format;
-          const oldOrientation = state.orientation;
-          const oldB = PAPER_DIMS[oldFormat] || PAPER_DIMS.a4;
-          const oldW = oldOrientation === 'landscape' ? oldB.h : oldB.w;
-          const oldH = oldOrientation === 'landscape' ? oldB.w : oldB.h;
-
-          const newFormat = newState.format || state.format;
-          const newOrientation = newState.orientation || state.orientation;
-          const newB = PAPER_DIMS[newFormat] || PAPER_DIMS.a4;
-          const newW = newOrientation === 'landscape' ? newB.h : newB.w;
-          const newH = newOrientation === 'landscape' ? newB.w : newB.h;
-
-          const scaleX = newW / oldW;
-          const scaleY = newH / oldH;
-          const scaleMin = Math.min(scaleX, scaleY);
-
-          finalState.shapes = state.shapes.map(shape => ({
-            ...shape,
-            x: shape.x * scaleX,
-            y: shape.y * scaleY,
-            width: shape.width * scaleX,
-            ...(shape.height !== undefined ? { height: shape.height * scaleY } : {}),
-            ...(shape.fontSize !== undefined ? { fontSize: shape.fontSize * scaleMin } : {})
-          }));
-        }
-      }
-    }
-
+  const applyRestOfUpdateState = (finalState, newState) => {
     if (newState.grid !== undefined && editorRef.current) {
       const DEF_CURSIVE = 'Аа Бб Вв 1 2 3 4 5Пишу красиво и легко.С Точилкой всё сходится!';
       const DEF_PRINT = 'А Б В 1 2 3 4 5ПИШУ КРАСИВО.';
@@ -132,20 +96,61 @@ function SidebarSettings({ onOpenHelp }) {
     updateState(finalState);
   };
 
-  const [toast, setToast] = useState(null);
-  const toastTimeoutRef = useRef(null);
+  const handleUpdateState = (newState) => {
+    let finalState = { ...newState };
 
-  const showToast = (message, onUndo) => {
-    setToast({ message, onUndo });
-    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    toastTimeoutRef.current = setTimeout(() => setToast(null), 5000);
+    if ((newState.format && newState.format !== state.format) || 
+        (newState.orientation && newState.orientation !== state.orientation)) {
+      
+      const hasShapes = state.shapes && state.shapes.length > 0;
+      if (hasShapes) {
+        showConfirm({
+          title: 'Масштабировать фигуры?',
+          message: 'При изменении формата или ориентации листа вы можете пропорционально изменить размер нарисованных фигур.',
+          confirmText: 'Да, пропорционально',
+          cancelText: 'Нет, оставить',
+          onConfirm: () => {
+            const oldFormat = state.format;
+            const oldOrientation = state.orientation;
+            const oldB = PAPER_DIMS[oldFormat] || PAPER_DIMS.a4;
+            const oldW = oldOrientation === 'landscape' ? oldB.h : oldB.w;
+            const oldH = oldOrientation === 'landscape' ? oldB.w : oldB.h;
+
+            const newFormat = newState.format || state.format;
+            const newOrientation = newState.orientation || state.orientation;
+            const newB = PAPER_DIMS[newFormat] || PAPER_DIMS.a4;
+            const newW = newOrientation === 'landscape' ? newB.h : newB.w;
+            const newH = newOrientation === 'landscape' ? newB.w : newB.h;
+
+            const scaleX = newW / oldW;
+            const scaleY = newH / oldH;
+            const scaleMin = Math.min(scaleX, scaleY);
+
+            finalState.shapes = state.shapes.map(shape => ({
+              ...shape,
+              x: shape.x * scaleX,
+              y: shape.y * scaleY,
+              width: shape.width * scaleX,
+              ...(shape.height !== undefined ? { height: shape.height * scaleY } : {}),
+              ...(shape.fontSize !== undefined ? { fontSize: shape.fontSize * scaleMin } : {})
+            }));
+            
+            applyRestOfUpdateState(finalState, newState);
+          },
+          onCancel: () => {
+            applyRestOfUpdateState(finalState, newState);
+          }
+        });
+        return;
+      }
+    }
+
+    applyRestOfUpdateState(finalState, newState);
   };
 
   const applyInlineStyle = (type, value) => {
     return applyStyleToSelection(editorRef, type, value, handleInput);
   };
-
-  const [activeTab, setActiveTab] = useState('text'); // 'text' | 'list'
   
   useEffect(() => {
     if (editorRef.current && !editorRef.current.innerHTML) {
@@ -172,22 +177,28 @@ function SidebarSettings({ onOpenHelp }) {
           </div>
           
           <div className="ml-auto flex items-center gap-1">
-            <button 
-              onClick={undo} 
-              disabled={!canUndo}
-              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${canUndo ? 'bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600' : 'bg-transparent text-stone-300'}`} 
-              title="Отменить действие (Ctrl+Z)"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
-            </button>
-            <button 
-              onClick={redo} 
-              disabled={!canRedo}
-              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${canRedo ? 'bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600' : 'bg-transparent text-stone-300'}`} 
-              title="Вернуть действие (Ctrl+Y)"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
-            </button>
+            <Tooltip content="Отменить действие (Ctrl+Z)" side="top">
+              <button
+                onClick={undo}
+                disabled={!canUndo}
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-stone-900 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-stone-600 transition-colors shadow-sm"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                </svg>
+              </button>
+            </Tooltip>
+            <Tooltip content="Вернуть действие (Ctrl+Y)" side="top">
+              <button
+                onClick={redo}
+                disabled={!canRedo}
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-stone-900 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-stone-600 transition-colors shadow-sm"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" />
+                </svg>
+              </button>
+            </Tooltip>
             
             <div className="w-px h-5 bg-stone-200 mx-1"></div>
             
@@ -232,7 +243,7 @@ function SidebarSettings({ onOpenHelp }) {
                     <Toolbar 
                       editorRef={editorRef} 
                       onUpdate={handleInput} 
-                      onClear={clearText}
+                      onClear={handleClearText}
                       onUndo={undo}
                       onRedo={redo}
                     />
@@ -345,14 +356,26 @@ function SidebarSettings({ onOpenHelp }) {
               const ua = navigator.userAgent || navigator.vendor || window.opera;
               const isTelegram = (ua.indexOf('Telegram') > -1);
               if (isTelegram) {
-                alert('Встроенный браузер Telegram не поддерживает сохранение PDF. Пожалуйста, откройте страницу в обычном браузере (Chrome/Safari) через меню (три точки в правом верхнем углу).');
+                showAlert({
+                  title: 'Браузер не поддерживается',
+                  message: 'Встроенный браузер Telegram не поддерживает сохранение PDF. Пожалуйста, откройте страницу в обычном браузере (Chrome/Safari) через меню (три точки в правом верхнем углу).',
+                  type: 'warning'
+                });
                 return;
               }
               const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
               if (isIOS) {
-                  alert('На iPhone/iPad: нажмите на иконку "Поделиться" и выберите "Напечатать", затем сведите два пальца на предпросмотре, чтобы сохранить как PDF.');
+                  showAlert({
+                    title: 'Сохранение PDF',
+                    message: 'На iPhone/iPad: нажмите на иконку "Поделиться" и выберите "Напечатать", затем сведите два пальца на предпросмотре, чтобы сохранить как PDF.',
+                    type: 'info'
+                  });
               } else {
-                  alert('Чтобы сохранить файл, в открывшемся окне выберите принтер "Сохранить как PDF" (или "Save as PDF").');
+                  showAlert({
+                    title: 'Сохранение PDF',
+                    message: 'Чтобы сохранить файл, в открывшемся окне выберите принтер "Сохранить как PDF" (или "Save as PDF").',
+                    type: 'info'
+                  });
               }
               window.print(); 
             }}
@@ -363,18 +386,6 @@ function SidebarSettings({ onOpenHelp }) {
 
       </aside>
 
-      {/* Global Toast */}
-      {toast && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-stone-900/90 backdrop-blur text-white rounded-full py-2 px-5 text-sm flex items-center gap-4 shadow-xl animate-fade-in z-[100] border border-stone-700/50">
-          <span>{toast.message}</span>
-          <button 
-            onClick={() => { toast.onUndo(); setToast(null); }}
-            className="font-medium text-brand-blue hover:text-blue-300 transition-colors"
-          >
-            Отменить
-          </button>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,18 +1,17 @@
 import React from 'react';
+import { Modal } from './ui/Modal';
 
 function HelpModal({ isOpen, onClose }) {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 backdrop-blur-sm p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
-        <div className="flex justify-between items-center p-6 border-b border-stone-200/50">
+    <Modal isOpen={isOpen} onClose={onClose} className="sm:max-w-2xl w-full">
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between items-center pb-4 border-b border-stone-200/50">
           <h2 className="text-xl font-bold text-stone-900">Как пользоваться генератором?</h2>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-100 text-stone-500 transition-colors">
             ✕
           </button>
         </div>
-        <div className="p-6 overflow-y-auto space-y-6 text-stone-700 text-sm leading-relaxed">
+        <div className="space-y-6 text-stone-700 text-sm leading-relaxed">
           <section>
             <h3 className="text-base font-semibold text-stone-900 mb-2 flex items-center gap-2">✍️ Вкладка «Текст»</h3>
             <ul className="list-disc pl-5 space-y-2">
@@ -49,7 +48,7 @@ function HelpModal({ isOpen, onClose }) {
           </section>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
