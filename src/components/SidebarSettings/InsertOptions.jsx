@@ -59,8 +59,18 @@ const InsertOptions = () => {
     return (
       <section className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-200">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xs font-bold text-stone-500 uppercase tracking-wider">
-            Свойства: {
+          <div className="flex items-center gap-2">
+            <button
+              className="p-1 -ml-1 text-stone-400 hover:text-stone-600 rounded hover:bg-stone-100 transition-colors"
+              onClick={() => updateState({ selectedShapeId: null })}
+              title="Назад к выбору фигур"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <h2 className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+              Свойства: {
               {
                 line: 'Прямая',
                 segment: 'Отрезок',
@@ -80,6 +90,7 @@ const InsertOptions = () => {
               }[selectedShape.type] || 'Фигура'
             }
           </h2>
+          </div>
           <button 
             className="px-3 py-1 bg-red-50 text-red-600 rounded hover:bg-red-100 text-xs transition-colors"
             onClick={removeSelected}
