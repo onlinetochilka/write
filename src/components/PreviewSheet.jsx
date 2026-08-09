@@ -148,7 +148,7 @@ function PreviewSheet() {
         <svg
           ref={svgRef}
           className="absolute inset-0 w-full h-full"
-          style={{ pointerEvents: 'auto' }}
+          style={{ pointerEvents: 'auto', touchAction: 'none' }}
           viewBox={`0 0 ${displayW} ${H}`}
           preserveAspectRatio="xMidYMid meet"
         >

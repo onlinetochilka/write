@@ -24,7 +24,7 @@ export function getTextBounds(margin, W) {
   }
 }
 
-function getDecorations(chunk, x, y, decWidth, fontSize, lineH, fill, keyPrefix) {
+function getDecorations(chunk, x, y, decWidth, fontSize, lineH, fill, keyPrefix, isBaseStart = true, isBaseEnd = true) {
   const elements = [];
   let k = 0;
   if (chunk.ul && chunk.ul !== 'none') {
@@ -55,28 +55,43 @@ function getDecorations(chunk, x, y, decWidth, fontSize, lineH, fill, keyPrefix)
   if (chunk.morph && chunk.morph !== 'none') {
     const mC = '#2e7d32'; // Фиксированный зеленый цвет для морфологии
     const mSw = 0.3;
-    const my = y - fontSize * 0.7;
+    
+    // Морфемы всегда рисуются на высоте строчных букв, даже если есть заглавные или высокие хвостики
+    const letterH = fontSize * 0.35;
+    const baseY = y - letterH - (fontSize * 0.08); 
+    const markH = fontSize * 0.25; 
+    const topY = baseY - markH;
 
     if (chunk.morph === 'prefix') {
-      const d = `M ${r(x)} ${r(my)} L ${r(x + decWidth)} ${r(my)} L ${r(x + decWidth)} ${r(my + 4)}`;
+      const prefixMarkH = fontSize * 0.12; 
+      const topY = baseY - prefixMarkH;
+      const d = `M ${r(x)} ${r(topY)} L ${r(x + decWidth)} ${r(topY)} L ${r(x + decWidth)} ${r(baseY)}`;
       elements.push({ type: 'path', key: `${keyPrefix}_morph${k++}`, d, stroke: mC, strokeWidth: mSw, fill: "none" });
     } else if (chunk.morph === 'root') {
-      const d = `M ${r(x)} ${r(my + 2)} Q ${r(x + decWidth / 2)} ${r(my - 4)} ${r(x + decWidth)} ${r(my + 2)}`;
+      const d = `M ${r(x)} ${r(baseY)} Q ${r(x + decWidth / 2)} ${r(topY)} ${r(x + decWidth)} ${r(baseY)}`;
       elements.push({ type: 'path', key: `${keyPrefix}_morph${k++}`, d, stroke: mC, strokeWidth: mSw, fill: "none" });
     } else if (chunk.morph === 'suffix') {
-      const d = `M ${r(x)} ${r(my + 2)} L ${r(x + decWidth / 2)} ${r(my - 4)} L ${r(x + decWidth)} ${r(my + 2)}`;
+      const d = `M ${r(x)} ${r(baseY)} L ${r(x + decWidth / 2)} ${r(topY)} L ${r(x + decWidth)} ${r(baseY)}`;
       elements.push({ type: 'path', key: `${keyPrefix}_morph${k++}`, d, stroke: mC, strokeWidth: mSw, fill: "none" });
-      } else if (chunk.morph === 'ending') {
-        const boxH = fontSize * 0.8;
-        elements.push({ type: 'rect', key: `${keyPrefix}_morph${k++}`, x: r(x), y: r(y - boxH), width: r(decWidth), height: r(boxH + 2), stroke: mC, strokeWidth: mSw, fill: "none" });
-      }
+    } else if (chunk.morph === 'ending') {
+      const boxH = letterH + fontSize * 0.15;
+      const rectH = boxH + fontSize * 0.15;
+      elements.push({ type: 'rect', key: `${keyPrefix}_morph${k++}`, x: r(x), y: r(y - boxH), width: r(decWidth), height: r(rectH), stroke: mC, strokeWidth: mSw, fill: "none" });
     }
+  }
 
-    if (chunk.base) {
-      const mC = '#2e7d32'; // Фиксированный зеленый цвет для морфологии
-      const d = `M ${r(x)} ${r(y)} L ${r(x)} ${r(y + 4)} L ${r(x + decWidth)} ${r(y + 4)} L ${r(x + decWidth)} ${r(y)}`;
-      elements.push({ type: 'path', key: `${keyPrefix}_base${k++}`, d, stroke: mC, strokeWidth: 0.3, fill: "none" });
-    }
+  if (chunk.base) {
+    const mC = '#2e7d32'; // Фиксированный зеленый цвет для морфологии
+    let d = '';
+    if (isBaseStart) d += `M ${r(x)} ${r(y)} L ${r(x)} ${r(y + 4)} `;
+    else d += `M ${r(x)} ${r(y + 4)} `;
+    
+    d += `L ${r(x + decWidth)} ${r(y + 4)} `;
+    
+    if (isBaseEnd) d += `L ${r(x + decWidth)} ${r(y)}`;
+    
+    elements.push({ type: 'path', key: `${keyPrefix}_base${k++}`, d, stroke: mC, strokeWidth: 0.3, fill: "none" });
+  }
   return elements;
 }
 
@@ -85,20 +100,19 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
     let w = 0;
     const chunkFont = chunkObj?.font || printFont;
     const chunkFs = chunkObj?.fs || printFontSize;
-    
+
     const isCursive = chunkFont === 'ClassRoomCursive';
-    let font = isCursive ? (LATIN_RE.test(textStr) ? "ClassRoomCursive, cursive" : "Propisi, cursive") : `${chunkFont}, sans-serif`;
-    let canvasFont = isCursive ? (LATIN_RE.test(textStr) ? "'ClassRoomCursive', cursive" : "'Propisi', cursive") : `'${chunkFont}', sans-serif`;
-    let baseFontSize = isCursive ? fontSize : chunkFs;
-    
-    let digitFs = baseFontSize;
+    let fontSz = isCursive ? fontSize : chunkFs;
+    let digitFs = fontSz;
     if (isCursive && cfg) {
       if (cfg.hasHelper) digitFs = fontSize * 0.60;
       else if (cfg.step === 5) digitFs = fontSize * 0.65;
       else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
     }
-    let digitFamily = isCursive ? "ClassRoomCursive, cursive" : `${chunkFont}, sans-serif`;
-    let canvasDigitFamily = isCursive ? "'ClassRoomCursive', cursive" : `'${chunkFont}', sans-serif`;
+
+    const canvasFont = isCursive ? (LATIN_RE.test(textStr) ? "'ClassRoomCursive', cursive" : "'Propisi', cursive") : `'${chunkFont}', sans-serif`;
+    const canvasDigitFamily = isCursive ? "'ClassRoomCursive', cursive" : `'${chunkFont}', sans-serif`;
+
     let baseWeight = chunkObj?.bold ? 'bold' : 'normal';
     let digitWeight = chunkObj?.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
 
@@ -112,8 +126,44 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
          const fontStr = `${measureDigitWeight} ${r(digitFs)}px ${canvasDigitFamily}`;
          w += getMeasuredWidth('.' + part + '.', fontStr) - getMeasuredWidth('..', fontStr);
       } else {
-         const fontStr = `${measureBaseWeight} ${r(baseFontSize)}px ${canvasFont}`;
+         const fontStr = `${measureBaseWeight} ${r(fontSz)}px ${canvasFont}`;
          w += getMeasuredWidth('.' + part + '.', fontStr) - getMeasuredWidth('..', fontStr);
+      }
+    }
+    return w;
+  };
+
+  const measureAdvanceWidth = (textStr, chunkObj) => {
+    let w = 0;
+    const chunkFont = chunkObj?.font || printFont;
+    const chunkFs = chunkObj?.fs || printFontSize;
+    
+    const isCursive = chunkFont === 'ClassRoomCursive';
+    let canvasFont = isCursive ? (LATIN_RE.test(textStr) ? "'ClassRoomCursive', cursive" : "'Propisi', cursive") : `'${chunkFont}', sans-serif`;
+    let baseFontSize = isCursive ? fontSize : chunkFs;
+    
+    let digitFs = baseFontSize;
+    if (isCursive && cfg) {
+      if (cfg.hasHelper) digitFs = fontSize * 0.60;
+      else if (cfg.step === 5) digitFs = fontSize * 0.65;
+      else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
+    }
+    let canvasDigitFamily = isCursive ? "'ClassRoomCursive', cursive" : `'${chunkFont}', sans-serif`;
+    let baseWeight = chunkObj?.bold ? 'bold' : 'normal';
+    let digitWeight = chunkObj?.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
+
+    let measureBaseWeight = isCursive ? 'normal' : baseWeight;
+    let measureDigitWeight = isCursive ? 'normal' : digitWeight;
+
+    const parts = textStr.split(/(\d+)/g);
+    for (const part of parts) {
+      if (!part) continue;
+      if (/\d+/.test(part)) {
+         const fontStr = `${measureDigitWeight} ${r(digitFs)}px ${canvasDigitFamily}`;
+         w += getMeasuredWidth(part, fontStr);
+      } else {
+         const fontStr = `${measureBaseWeight} ${r(baseFontSize)}px ${canvasFont}`;
+         w += getMeasuredWidth(part, fontStr);
       }
     }
     return w;
@@ -123,8 +173,15 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
   let y = startY;
   const elements = [];
   let k = 0;
+  
+  let activeBaseId = null;
+  let activeBaseLineY = null;
+  let activeTextElement = null;
+  let activeTextElementEndX = initialX;
+  let contextText = '';
 
-  for (const chunkObj of lineChunks) {
+  for (let chunkIdx = 0; chunkIdx < lineChunks.length; chunkIdx++) {
+    const chunkObj = lineChunks[chunkIdx];
     if (!chunkObj.text) continue;
     const text = chunkObj.text;
     const chunkColor = chunkObj.color || fill;
@@ -134,58 +191,102 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
 
     const flushAcc = (yPos) => {
       if (!accText) return;
-      const estWidth = measureMixedText(accText, chunkObj);
+      
+      let chunkStr = accText;
+      const chunkFont = chunkObj?.font || printFont;
+      const chunkFs = chunkObj?.fs || printFontSize;
+      const isCursive = chunkFont === 'ClassRoomCursive';
+      let font = isCursive ? (LATIN_RE.test(chunkStr) ? "ClassRoomCursive, cursive" : "Propisi, cursive") : `${chunkFont}, sans-serif`;
+      let fontSz = isCursive ? fontSize : chunkFs;
+      let digitFs = fontSz;
+      if (isCursive && cfg) {
+        if (cfg.hasHelper) digitFs = fontSize * 0.60;
+        else if (cfg.step === 5) digitFs = fontSize * 0.65;
+        else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
+      }
+      let digitFamily = isCursive ? "ClassRoomCursive, cursive" : `${chunkFont}, sans-serif`;
+      let baseWeight = chunkObj.bold ? 'bold' : 'normal';
+      let digitWeight = chunkObj.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
+
+      const isCompatible = activeTextElement &&
+                           activeTextElement.y === r(yPos) &&
+                           activeTextElement.fill === chunkColor &&
+                           activeTextElement.fontFamily === font &&
+                           activeTextElement.fontWeight === baseWeight &&
+                           Math.abs(activeTextElementEndX - currentX) < 1.0;
+
+      let estWidth = 0;
+      if (isCompatible) {
+        estWidth = measureMixedText(contextText + accText, chunkObj) - measureMixedText(contextText, chunkObj);
+      } else {
+        estWidth = measureMixedText(accText, chunkObj);
+      }
+
+      let isBaseStart = false;
+      let isBaseEnd = false;
+
+      if (chunkObj.base) {
+        if (activeBaseId !== chunkObj.baseId || activeBaseLineY !== yPos) {
+          isBaseStart = true;
+        }
+        
+        const wrappingNow = (i < text.length && currentX + measureMixedText(accText + text[i], chunkObj) > endX);
+        const finishingChunk = (i === text.length);
+        const nextChunkDifferent = chunkIdx === lineChunks.length - 1 || lineChunks[chunkIdx + 1].baseId !== chunkObj.baseId;
+
+        if (wrappingNow || (finishingChunk && nextChunkDifferent)) {
+          isBaseEnd = true;
+        }
+      }
 
       if (yPos <= H) {
-        let chunkStr = accText;
-        const chunkFont = chunkObj?.font || printFont;
-        const chunkFs = chunkObj?.fs || printFontSize;
-
-        const isCursive = chunkFont === 'ClassRoomCursive';
-        let font = isCursive ? (LATIN_RE.test(chunkStr) ? "ClassRoomCursive, cursive" : "Propisi, cursive") : `${chunkFont}, sans-serif`;
-        
-        let fontSz = isCursive ? fontSize : chunkFs;
-        let digitFs = fontSz;
-        if (isCursive && cfg) {
-          if (cfg.hasHelper) digitFs = fontSize * 0.60;
-          else if (cfg.step === 5) digitFs = fontSize * 0.65;
-          else if (cfg.step === 9.52) digitFs = fontSize * 0.75;
-        }
-        let digitFamily = isCursive ? "ClassRoomCursive, cursive" : `${chunkFont}, sans-serif`;
-        let baseWeight = chunkObj.bold ? 'bold' : 'normal';
-        let digitWeight = chunkObj.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
-
         const parts = chunkStr.split(/(\d+)/g);
-        
-        elements.push({
-          type: 'text',
-          key: `${kPfx}_text${k++}`,
-          x: r(currentX),
-          y: r(yPos),
-          fontSize: r(fontSz),
-          fontWeight: baseWeight,
-          fill: chunkColor,
-          fontFamily: font,
-          parts: parts.map(part => {
-            if (/\d+/.test(part)) {
-              return { isDigit: true, text: part, digitFamily, digitFs: r(digitFs), weight: digitWeight };
-            }
-            return { isDigit: false, text: part };
-          })
+        const newParts = parts.map(part => {
+          if (/\d+/.test(part)) {
+            return { isDigit: true, text: part, digitFamily, digitFs: r(digitFs), weight: digitWeight };
+          }
+          return { isDigit: false, text: part };
         });
+
+        if (isCompatible) {
+          activeTextElement.parts.push(...newParts);
+          contextText += accText;
+        } else {
+          activeTextElement = {
+            type: 'text',
+            key: `${kPfx}_text${k++}`,
+            x: r(currentX),
+            y: r(yPos),
+            fontSize: r(fontSz),
+            fontWeight: baseWeight,
+            fill: chunkColor,
+            fontFamily: font,
+            parts: newParts
+          };
+          elements.push(activeTextElement);
+          contextText = accText;
+        }
+        activeTextElementEndX = currentX + estWidth;
 
         const trimmedText = accText.trimEnd();
         const decWidth = measureMixedText(trimmedText, chunkObj);
-        elements.push(...getDecorations(chunkObj, currentX, yPos, decWidth, fontSize, lineH, fill, `${kPfx}_dec${k++}`));
+        elements.push(...getDecorations(chunkObj, currentX, yPos, decWidth, fontSize, lineH, fill, `${kPfx}_dec${k++}`, isBaseStart, isBaseEnd));
+        
+        if (chunkObj.base) {
+           activeBaseId = chunkObj.baseId;
+           activeBaseLineY = yPos;
+        } else {
+           activeBaseId = null;
+        }
       }
       currentX += estWidth;
       accText = '';
     };
 
     while (i < text.length) {
-      if (text[i] === '´') {
+      if (text[i] === '\u0301') {
         if (y <= H && accText !== '') {
-          const wText = measureMixedText(accText, chunkObj);
+          const wText = measureAdvanceWidth(accText, chunkObj);
           const accX = currentX + wText - (fontSize * 0.15);
           elements.push({
             type: 'text-acc',
@@ -340,8 +441,8 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
       let i = 0;
       const t = chunkObj.text;
       while(i < t.length) {
-        if (t[i] === '´') {
-          chars.push({ ch: '´', chunkObj });
+        if (t[i] === '\u0301') {
+          chars.push({ ch: '\u0301', chunkObj });
           i++;
         } else {
           chars.push({ ch: t[i], chunkObj });
@@ -350,7 +451,7 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
       }
     }
     
-    let totalChars = chars.filter(c => c.ch !== '´').length;
+    let totalChars = chars.filter(c => c.ch !== '\u0301').length;
     let startCol = 0;
     if (align === 'center' && totalChars < cols) startCol = Math.floor((cols - totalChars) / 2);
     else if (align === 'right' && totalChars < cols) startCol = cols - totalChars;
@@ -369,7 +470,7 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
 
       const weight = chunkObj.bold ? 'bold' : (isCursive ? 'bold' : 'normal');
 
-      if (ch === '´') {
+      if (ch === '\u0301') {
         if (rowY <= H && col > 0) {
           const prevCx = startX + (col - 1) * step + step / 2;
           allElements.push({

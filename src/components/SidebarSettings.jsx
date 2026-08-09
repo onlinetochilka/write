@@ -166,7 +166,7 @@ function SidebarSettings({ onOpenHelp }) {
           <div>
             <h1 className="text-base font-semibold text-stone-900 leading-snug">Идеальная тетрадь</h1>
             <div className="text-xs font-medium text-stone-500 flex gap-2 items-center">
-              <span>Создавайте прописи и образцы</span>
+              <span>Создавайте прописи и памятки</span>
             </div>
           </div>
           
@@ -224,17 +224,6 @@ function SidebarSettings({ onOpenHelp }) {
               {/* Text Editor Section */}
               <section className="flex-1 flex flex-col min-h-0">
                 <div className="relative flex-shrink-0">
-                  {toast && (
-                    <div className="absolute top-0 right-0 left-0 -mt-1 bg-blue-50 border border-brand-blue/30 text-brand-blue rounded-lg p-2 text-xs flex items-center justify-between shadow-sm animate-fade-in z-50 backdrop-blur-sm bg-blue-50/95 mb-2">
-                      <span className="flex-1 pr-2 truncate">{toast.message}</span>
-                      <button 
-                        onClick={() => { toast.onUndo(); setToast(null); }}
-                        className="font-semibold whitespace-nowrap hover:underline px-2 py-1 bg-brand-blue/10 rounded"
-                      >
-                        Отменить
-                      </button>
-                    </div>
-                  )}
                 </div>
                 
                 <div className="border border-stone-200/50 bg-white rounded-xl shadow-sm relative flex flex-col mt-2 flex-1 min-h-0">
@@ -348,13 +337,42 @@ function SidebarSettings({ onOpenHelp }) {
         <footer className="p-4 border-t border-stone-200/50 bg-stone-50/50 flex flex-col gap-2">
           <button 
             className="w-full h-12 rounded-xl bg-brand-blue text-white font-semibold flex items-center justify-center gap-2 hover:bg-[#005270] shadow-[0_4px_14px_rgba(0,101,132,0.30)] transition-all active:scale-[0.98]"
-            onClick={() => { trackGoal('print_click'); trackGoal('download_pdf_click'); alert('Чтобы сохранить файл, в открывшемся окне выберите принтер "Сохранить как PDF" (или "Save as PDF").'); window.print(); }}
+            onClick={() => { 
+              trackGoal('print_click'); 
+              trackGoal('download_pdf_click'); 
+              const ua = navigator.userAgent || navigator.vendor || window.opera;
+              const isTelegram = (ua.indexOf('Telegram') > -1);
+              if (isTelegram) {
+                alert('Встроенный браузер Telegram не поддерживает сохранение PDF. Пожалуйста, откройте страницу в обычном браузере (Chrome/Safari) через меню (три точки в правом верхнем углу).');
+                return;
+              }
+              const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+              if (isIOS) {
+                  alert('На iPhone/iPad: нажмите на иконку "Поделиться" и выберите "Напечатать", затем сведите два пальца на предпросмотре, чтобы сохранить как PDF.');
+              } else {
+                  alert('Чтобы сохранить файл, в открывшемся окне выберите принтер "Сохранить как PDF" (или "Save as PDF").');
+              }
+              window.print(); 
+            }}
           >
             Печать / Сохранить как PDF
           </button>
         </footer>
 
       </aside>
+
+      {/* Global Toast */}
+      {toast && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-stone-900/90 backdrop-blur text-white rounded-full py-2 px-5 text-sm flex items-center gap-4 shadow-xl animate-fade-in z-[100] border border-stone-700/50">
+          <span>{toast.message}</span>
+          <button 
+            onClick={() => { toast.onUndo(); setToast(null); }}
+            className="font-medium text-brand-blue hover:text-blue-300 transition-colors"
+          >
+            Отменить
+          </button>
+        </div>
+      )}
     </div>
   );
 }

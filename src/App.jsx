@@ -4,11 +4,9 @@ import Layout from './components/Layout';
 import SidebarSettings from './components/SidebarSettings';
 import PreviewSheet from './components/PreviewSheet';
 import HelpModal from './components/HelpModal';
-import GlassDrawer from './components/GlassDrawer';
 
 function App() {
   const [isHelpOpen, setHelpOpen] = useState(false);
-  const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   React.useEffect(() => {
@@ -28,7 +26,6 @@ function App() {
         <PreviewSheet />
       </Layout>
       <HelpModal isOpen={isHelpOpen} onClose={() => setHelpOpen(false)} />
-      <GlassDrawer isOpen={isDrawerOpen} onToggle={() => setDrawerOpen(!isDrawerOpen)} />
     </StoreProvider>
   );
 }
