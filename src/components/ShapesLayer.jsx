@@ -813,6 +813,72 @@ const ShapesLayer = ({ W, H, svgRef }) => {
           </foreignObject>
         </g>
       );
+    } else if (shape.type === 'coord_plane') {
+      const cx = shape.width / 2;
+      const cy = shape.height / 2;
+      
+      const xAxis = <line key="x-axis" x1={0} y1={cy} x2={shape.width} y2={cy} stroke={strokeColor} strokeWidth={strokeWidth} />;
+      const xArrow = <path key="x-arrow" d={`M${shape.width - 5} ${cy - 2} L${shape.width} ${cy} L${shape.width - 5} ${cy + 2}`} fill="none" stroke={strokeColor} strokeWidth={Math.max(0.3, strokeWidth)} strokeLinecap="round" strokeLinejoin="round" />;
+      
+      const yAxis = <line key="y-axis" x1={cx} y1={shape.height} x2={cx} y2={0} stroke={strokeColor} strokeWidth={strokeWidth} />;
+      const yArrow = <path key="y-arrow" d={`M${cx - 2} 5 L${cx} 0 L${cx + 2} 5`} fill="none" stroke={strokeColor} strokeWidth={Math.max(0.3, strokeWidth)} strokeLinecap="round" strokeLinejoin="round" />;
+      
+      let ticks = [];
+      if (shape.showTicks !== false) {
+        let unitSize = shape.unitSize || 10;
+        if (shape.scaleMode === 'fixed_count') {
+          const maxU = shape.maxUnits || 5;
+          unitSize = (shape.width / 2 - 10) / maxU;
+        }
+        const subdivisions = shape.subdivisions || 1;
+        const step = unitSize / subdivisions;
+        
+        let maxXTicks = Math.floor((shape.width / 2 - 6) / step);
+        let maxYTicks = Math.floor((shape.height / 2 - 6) / step);
+        
+        if (shape.scaleMode === 'fixed_count') {
+          maxXTicks = Math.min(maxXTicks, (shape.maxUnits || 5) * subdivisions);
+          maxYTicks = Math.min(maxYTicks, (shape.maxUnits || 5) * subdivisions);
+        }
+        
+        for (let i = -maxXTicks; i <= maxXTicks; i++) {
+          if (i === 0) continue;
+          const x = cx + i * step;
+          const isMainTick = i % subdivisions === 0;
+          const tickValue = (shape.startValue || 0) + (i / subdivisions);
+          
+          ticks.push(<line key={`xtick-${i}`} x1={x} y1={cy - (isMainTick ? 2 : 1)} x2={x} y2={cy + (isMainTick ? 2 : 1)} stroke={strokeColor} strokeWidth={strokeWidth} />);
+          if (isMainTick && shape.showNumbers !== false) {
+             ticks.push(<text key={`xnum-${i}`} x={x} y={cy + 8} fontSize="5" fill={strokeColor} fontFamily="Georgia, serif" textAnchor="middle">{tickValue}</text>);
+          }
+        }
+        
+        for (let i = -maxYTicks; i <= maxYTicks; i++) {
+          if (i === 0) continue;
+          const y = cy - i * step;
+          const isMainTick = i % subdivisions === 0;
+          const tickValue = (shape.startValue || 0) + (i / subdivisions);
+          
+          ticks.push(<line key={`ytick-${i}`} x1={cx - (isMainTick ? 2 : 1)} y1={y} x2={cx + (isMainTick ? 2 : 1)} y2={y} stroke={strokeColor} strokeWidth={strokeWidth} />);
+          if (isMainTick && shape.showNumbers !== false) {
+             ticks.push(<text key={`ynum-${i}`} x={cx - 4} y={y + 1.5} fontSize="5" fill={strokeColor} fontFamily="Georgia, serif" textAnchor="end">{tickValue}</text>);
+          }
+        }
+        
+        if (shape.showNumbers !== false) {
+           ticks.push(<text key="origin" x={cx - 3} y={cy + 7} fontSize="5" fill={strokeColor} fontFamily="Georgia, serif" textAnchor="end">{shape.startValue || 0}</text>);
+           ticks.push(<text key="xlabel" x={shape.width - 2} y={cy + 8} fontSize="5" fill={strokeColor} fontFamily="Georgia, serif" fontStyle="italic" textAnchor="end">x</text>);
+           ticks.push(<text key="ylabel" x={cx - 4} y={6} fontSize="5" fill={strokeColor} fontFamily="Georgia, serif" fontStyle="italic" textAnchor="end">y</text>);
+        }
+      }
+      
+      element = (
+        <g>
+          {xAxis} {xArrow}
+          {yAxis} {yArrow}
+          <g>{ticks}</g>
+        </g>
+      );
     } else if (shape.type === 'text_box') {
       element = (
         <g>
@@ -858,7 +924,7 @@ const ShapesLayer = ({ W, H, svgRef }) => {
     
     if (labels.length > 0) {
       const vertices = [];
-      if (shape.type === 'coord_ray' || shape.type === 'coord_line') {
+      if (shape.type === 'coord_ray' || shape.type === 'coord_line' || shape.type === 'coord_plane') {
         vertices.push({ x: shape.width + 2, y: -2, align: 'start' }); // Right end only
       } else if (shape.type === 'line' || shape.type === 'segment' || shape.type === 'ray' || shape.type === 'dashed_segment') {
         vertices.push({ x: -2, y: -2, align: 'end' }); // Left
@@ -985,6 +1051,22 @@ const ShapesLayer = ({ W, H, svgRef }) => {
               style={{ cursor: 'crosshair' }}
               onPointerDown={(e) => handleRotateDown(e, shape)}
             />
+            {/* Delete handle (top right) */}
+            <g 
+              transform={`translate(${shape.width + 5}, -5)`}
+              style={{ cursor: 'pointer' }}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                updateState({
+                  shapes: shapes.filter(s => s.id !== shape.id),
+                  selectedShapeId: null
+                });
+              }}
+            >
+              <circle r="4.5" fill="#ef4444" stroke="#ffffff" strokeWidth="1" />
+              <line x1="-1.8" y1="-1.8" x2="1.8" y2="1.8" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+              <line x1="-1.8" y1="1.8" x2="1.8" y2="-1.8" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+            </g>
           </g>
         )}
       </g>

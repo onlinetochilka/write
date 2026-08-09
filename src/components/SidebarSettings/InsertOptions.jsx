@@ -21,7 +21,7 @@ const InsertOptions = () => {
       x: 100,
       y: 100,
       width: type === 'text_box' ? 80 : 100,
-      height: ['triangle', 'rectangle', 'parallelogram', 'trapezoid', 'circle', 'ellipse', 'image'].includes(type) ? 100 : (type === 'table' ? 60 : (type === 'text_box' ? 20 : 0)),
+      height: ['triangle', 'rectangle', 'parallelogram', 'trapezoid', 'circle', 'ellipse', 'image', 'coord_plane'].includes(type) ? 100 : (type === 'table' ? 60 : (type === 'text_box' ? 20 : 0)),
       rotation: 0,
       stroke: (type === 'image' || type === 'text_box') ? 'transparent' : '#10b981',
       strokeWidth: type === 'table' ? 0.3 : 0.2,
@@ -77,6 +77,7 @@ const InsertOptions = () => {
                 ray: 'Луч',
                 coord_ray: 'Коорд. луч',
                 coord_line: 'Коорд. прямая',
+                coord_plane: 'Коорд. плоскость',
                 dashed_segment: 'Пунктир',
                 triangle: 'Треугольник',
                 rectangle: 'Прямоугольник',
@@ -101,7 +102,7 @@ const InsertOptions = () => {
 
         {selectedShape.type !== 'image' && selectedShape.type !== 'text_box' && (
           <>
-            <div className={`grid ${['line', 'segment', 'ray', 'coord_ray', 'coord_line', 'dashed_segment'].includes(selectedShape.type) ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
+            <div className={`grid ${['line', 'segment', 'ray', 'coord_ray', 'coord_line', 'coord_plane', 'dashed_segment'].includes(selectedShape.type) ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
           <div>
             <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Цвет контура</div>
             <div className="flex items-center gap-3">
@@ -114,7 +115,7 @@ const InsertOptions = () => {
                   updateState({ shapes: updated });
                 }}
               />
-              {!['line', 'segment', 'ray', 'coord_ray', 'coord_line', 'dashed_segment'].includes(selectedShape.type) && (
+              {!['line', 'segment', 'ray', 'coord_ray', 'coord_line', 'coord_plane', 'dashed_segment'].includes(selectedShape.type) && (
                 <label className="flex items-center gap-2 text-xs text-stone-600 cursor-pointer">
                   <input 
                     type="checkbox"
@@ -131,7 +132,7 @@ const InsertOptions = () => {
             </div>
           </div>
 
-          {!['line', 'segment', 'ray', 'coord_ray', 'coord_line', 'dashed_segment'].includes(selectedShape.type) && (
+          {!['line', 'segment', 'ray', 'coord_ray', 'coord_line', 'coord_plane', 'dashed_segment'].includes(selectedShape.type) && (
             <div>
               <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Заливка</div>
               <div className="flex items-center gap-3">
@@ -449,7 +450,7 @@ const InsertOptions = () => {
           </div>
         )}
 
-        {(selectedShape.type === 'coord_ray' || selectedShape.type === 'coord_line') && (
+        {(selectedShape.type === 'coord_ray' || selectedShape.type === 'coord_line' || selectedShape.type === 'coord_plane') && (
           <div className="space-y-4 pt-2">
             <div>
               <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Режим разметки</div>
@@ -1376,6 +1377,18 @@ const InsertOptions = () => {
         >
           <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="2" y1="12" x2="20" y2="12" /><polyline points="15,8 20,12 15,16" /></svg>
           Коорд. прямая
+        </button>
+        <button 
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
+          onClick={() => addShape('coord_plane')}
+        >
+          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <polyline points="18,8 22,12 18,16" />
+            <line x1="12" y1="22" x2="12" y2="2" />
+            <polyline points="8,6 12,2 16,6" />
+          </svg>
+          Коорд. плоскость
         </button>
         <button 
           className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
