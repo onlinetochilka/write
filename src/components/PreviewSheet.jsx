@@ -28,9 +28,10 @@ function PreviewSheet() {
     mirrorMargins: s.mirrorMargins,
     printFont: s.printFont,
     printFontSize: s.printFontSize,
-    shapes: s.shapes
+    shapes: s.shapes,
+    zoom: s.zoom
   }));
-  const { format, orientation, grid, mode, layout, mathMode, margin, mirrorMargins, printFont, printFontSize, shapes } = state;
+  const { format, orientation, grid, mode, layout, mathMode, margin, mirrorMargins, printFont, printFontSize, shapes, zoom = 100 } = state;
   const svgRef = useRef(null);
   const [fontsLoaded, setFontsLoaded] = React.useState(false);
 
@@ -150,7 +151,7 @@ function PreviewSheet() {
       <div 
         id="previewSheet"
         className="a4-sheet print-page relative"
-        style={{ aspectRatio: `${displayW} / ${H}` }}
+        style={{ aspectRatio: `${displayW} / ${H}`, '--zoom-scale': zoom / 100 }}
         role="img"
         aria-label="Предпросмотр листа прописей"
       >
@@ -167,6 +168,25 @@ function PreviewSheet() {
         >
           <ShapesLayer W={displayW} H={H} svgRef={svgRef} />
         </svg>
+      </div>
+
+      {/* Zoom Controls */}
+      <div className="fixed bottom-6 right-8 z-50 flex items-center gap-2 bg-white shadow-lg border border-stone-200/60 p-1.5 rounded-xl print:hidden">
+        <button 
+          onClick={() => updateState({ zoom: Math.max(25, zoom - 25) })} 
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-stone-100 text-stone-600 transition-colors"
+          aria-label="Уменьшить"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <span className="text-sm font-bold text-stone-700 w-12 text-center select-none">{zoom}%</span>
+        <button 
+          onClick={() => updateState({ zoom: Math.min(300, zoom + 25) })} 
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-stone-100 text-stone-600 transition-colors"
+          aria-label="Увеличить"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
       </div>
     </main>
   );

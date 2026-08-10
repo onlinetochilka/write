@@ -65,19 +65,21 @@
     flex: 1;
     min-width: 0;
     height: 100%;
-    overflow: hidden;
+    overflow: auto;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     position: relative;
+    padding: 1.5rem;
   }
 
   .a4-sheet {
     background: #ffffff;
-    height: 100%;
-    max-height: 85vh;
-    max-width: 100%;
+    height: calc(100% * var(--zoom-scale, 1));
+    max-height: calc(85vh * var(--zoom-scale, 1));
+    max-width: calc(100% * var(--zoom-scale, 1));
     width: auto;
+    margin: auto;
     border-radius: 3px;
     box-shadow:
         0 4px 6px rgba(184,194,209,0.4),
@@ -85,7 +87,11 @@
         0 -2px 4px rgba(255,255,255,0.8);
     transition:
         aspect-ratio 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-        box-shadow 0.3s ease;
+        box-shadow 0.3s ease,
+        height 0.2s ease,
+        max-height 0.2s ease,
+        width 0.2s ease,
+        max-width 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -94,7 +100,7 @@
 
   @media (max-width: 1023px) {
     .a4-sheet {
-      width: 100%;
+      width: calc(100% * var(--zoom-scale, 1));
       height: auto;
       max-height: none;
     }

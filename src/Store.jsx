@@ -23,6 +23,7 @@ const initialState = {
   ],
   shapes: [],
   selectedShapeId: null,
+  zoom: 100,
 };
 
 export const StoreProvider = ({ children }) => {

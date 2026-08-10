@@ -59,8 +59,13 @@ export const applyStyleToSelection = (editorRef, type, value, onUpdate) => {
         targetSpan.dataset.bold = inherited.bold;
         targetSpan.style.fontWeight = 'bold';
     }
-    if (inherited.font) targetSpan.dataset.font = inherited.font;
-    if (inherited.fs) targetSpan.dataset.fs = inherited.fs;
+    if (inherited.font) {
+        targetSpan.dataset.font = inherited.font;
+        targetSpan.style.fontFamily = inherited.font === 'ClassRoomCursive' ? "'ClassRoomCursive', 'Propisi', cursive" : inherited.font;
+    }
+    if (inherited.fs) {
+        targetSpan.dataset.fs = inherited.fs;
+    }
   }
 
   if (type === 'color') {
@@ -75,8 +80,13 @@ export const applyStyleToSelection = (editorRef, type, value, onUpdate) => {
     targetSpan.dataset.bold = value;
     targetSpan.style.fontWeight = value === 'false' ? 'normal' : 'bold';
   }
-  if (type === 'font') targetSpan.dataset.font = value;
-  if (type === 'fs') targetSpan.dataset.fs = value;
+  if (type === 'font') {
+    targetSpan.dataset.font = value;
+    targetSpan.style.fontFamily = value === 'ClassRoomCursive' ? "'ClassRoomCursive', 'Propisi', cursive" : value;
+  }
+  if (type === 'fs') {
+    targetSpan.dataset.fs = value;
+  }
 
   try {
     const fragment = range.extractContents();
@@ -94,8 +104,13 @@ export const applyStyleToSelection = (editorRef, type, value, onUpdate) => {
             span.dataset.bold = value;
             span.style.fontWeight = value === 'false' ? 'normal' : 'bold';
         }
-        if (type === 'font') span.dataset.font = value;
-        if (type === 'fs') span.dataset.fs = value;
+        if (type === 'font') {
+            span.dataset.font = value;
+            span.style.fontFamily = value === 'ClassRoomCursive' ? "'ClassRoomCursive', 'Propisi', cursive" : value;
+        }
+        if (type === 'fs') {
+            span.dataset.fs = value;
+        }
     });
     targetSpan.appendChild(fragment);
     range.insertNode(targetSpan);

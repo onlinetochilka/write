@@ -179,9 +179,9 @@ function SidebarSettings({ onOpenHelp }) {
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={undo}
                 disabled={!canUndo}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-stone-900 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-stone-600 transition-colors shadow-sm"
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-stone-900 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-stone-600 transition-colors shadow-sm"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                 </svg>
               </button>
@@ -191,9 +191,9 @@ function SidebarSettings({ onOpenHelp }) {
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={redo}
                 disabled={!canRedo}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-stone-900 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-stone-600 transition-colors shadow-sm"
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-stone-900 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-stone-600 transition-colors shadow-sm"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" />
                 </svg>
               </button>

@@ -19,6 +19,30 @@ function Toolbar({ editorRef, onUpdate, state, updateState, applyInlineStyle, sh
     applyStyleToSelection(editorRef, type, value, onUpdate);
   };
 
+  const toggleBold = () => {
+    const sel = window.getSelection();
+    if (!sel.rangeCount || sel.isCollapsed) return;
+    const range = sel.getRangeAt(0);
+    const closestSpan = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE 
+        ? range.commonAncestorContainer.closest('span') 
+        : range.commonAncestorContainer.parentElement?.closest('span');
+    
+    let isBold = false;
+    let currentSpan = closestSpan;
+    while (currentSpan && currentSpan.tagName === 'SPAN') {
+        if (currentSpan.dataset.bold === 'true') {
+            isBold = true;
+            break;
+        }
+        if (currentSpan.dataset.bold === 'false') {
+            isBold = false;
+            break;
+        }
+        currentSpan = currentSpan.parentElement.closest('span');
+    }
+    applyStyleToSelection(editorRef, 'bold', isBold ? 'false' : 'true', onUpdate);
+  };
+
   const toggleAlign = (alignValue) => {
     const sel = window.getSelection();
     if (!sel.rangeCount || !editorRef.current) return;
@@ -52,9 +76,20 @@ function Toolbar({ editorRef, onUpdate, state, updateState, applyInlineStyle, sh
     onUpdate();
   };
 
+  const getCurrentFs = () => {
+    const sel = window.getSelection();
+    if (!sel.rangeCount || sel.isCollapsed) return parseFloat(state.printFontSize) || 18;
+    const range = sel.getRangeAt(0);
+    let node = range.commonAncestorContainer;
+    if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
+    const span = node.closest ? node.closest('span[data-fs]') : null;
+    if (span && span.dataset.fs) return parseFloat(span.dataset.fs);
+    return parseFloat(state.printFontSize) || 18;
+  };
+
   return (
-    <div className="flex items-center gap-1 border-b border-stone-200/50 pb-2">
-      <div className="flex gap-1 pr-1">
+    <div className="flex items-center justify-between border-b border-stone-200/50 pb-2 w-full">
+      <div className="flex items-center gap-0.5 shrink-0">
         <ColorPopover
           icon={Pencil}
           tooltip="Цвет текста"
@@ -70,9 +105,9 @@ function Toolbar({ editorRef, onUpdate, state, updateState, applyInlineStyle, sh
         />
       </div>
 
-      <div className="w-px h-5 bg-stone-200 mx-1"></div>
+      <div className="w-px h-5 bg-stone-200 shrink-0"></div>
 
-      <div className="flex gap-0.5">
+      <div className="flex items-center gap-0.5 shrink-0">
         <button onMouseDown={(e) => e.preventDefault()} onClick={() => toggleAlign('left')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="15" y1="12" x2="3" y2="12"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
         </button>
@@ -84,7 +119,15 @@ function Toolbar({ editorRef, onUpdate, state, updateState, applyInlineStyle, sh
         </button>
       </div>
 
-      <div className="w-px h-5 bg-stone-200 mx-1 ml-auto"></div>
+      <div className="w-px h-5 bg-stone-200 shrink-0"></div>
+
+      <Tooltip content="Жирный" side="top">
+        <button onMouseDown={(e) => e.preventDefault()} onClick={toggleBold} className="w-6 h-6 shrink-0 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold font-serif text-sm">Ж</button>
+      </Tooltip>
+
+      <div className="w-px h-5 bg-stone-200 shrink-0"></div>
+      
+      <div className="flex items-center gap-1">
       
       {/* Font Toggle (Segmented Control) */}
       <Tooltip content="Шрифт (Рукописный / Печатный)" side="top">
@@ -122,17 +165,27 @@ function Toolbar({ editorRef, onUpdate, state, updateState, applyInlineStyle, sh
       
       {/* Mode Toggle (Segmented Control) */}
       <Tooltip content="Буквы (Светлые / Тёмные)" side="top">
-        <div className="flex bg-stone-100/80 p-0.5 rounded-lg shrink-0 ml-1">
+        <div className="flex bg-stone-100/80 p-0.5 rounded-lg shrink-0">
           <button
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => updateState({ mode: 'tracing' })}
+            onClick={() => {
+              const applied = applyInlineStyle('color', '#c0cdd8');
+              if (!applied) {
+                updateState({ mode: 'tracing' });
+              }
+            }}
             className={`w-6 h-6 flex items-center justify-center rounded-md transition-all ${state.mode === 'tracing' ? 'bg-white shadow-sm ring-1 ring-black/5' : 'hover:bg-stone-200/50'}`}
           >
             <span className="font-sans font-bold text-[12px] text-stone-300">Аа</span>
           </button>
           <button
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => updateState({ mode: 'copy' })}
+            onClick={() => {
+              const applied = applyInlineStyle('color', '#1a1a2e');
+              if (!applied) {
+                updateState({ mode: 'copy' });
+              }
+            }}
             className={`w-6 h-6 flex items-center justify-center rounded-md transition-all ${state.mode !== 'tracing' ? 'bg-white shadow-sm ring-1 ring-black/5' : 'hover:bg-stone-200/50'}`}
           >
             <span className="font-sans font-bold text-[12px] text-stone-900">Аа</span>
@@ -140,20 +193,24 @@ function Toolbar({ editorRef, onUpdate, state, updateState, applyInlineStyle, sh
         </div>
       </Tooltip>
 
-      <div className="w-px h-5 bg-stone-200 mx-1"></div>
+      </div>
+
+      <div className="w-px h-5 bg-stone-200 shrink-0"></div>
 
       {/* Font Size Stepper */}
       <Tooltip content="Размер шрифта" side="top">
-        <div className="flex items-center bg-stone-100/80 rounded-md shrink-0">
+        <div className="flex items-center bg-stone-100/80 p-0.5 rounded-lg shrink-0">
           <button
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => {
-              let newFs = Math.max(2, (parseFloat(state.printFontSize) || 18) - 1);
+              let newFs = Math.max(2, getCurrentFs() - 1);
               const applied = applyInlineStyle('fs', newFs);
               if (!applied) {
                 const oldFs = state.printFontSize;
                 updateState({ printFontSize: newFs });
                 showToast('Изменен базовый размер.', () => updateState({ printFontSize: oldFs }));
+              } else {
+                updateState({ printFontSize: newFs });
               }
             }}
             className="w-5 h-6 flex items-center justify-center text-stone-500 hover:text-stone-900 transition-colors"
@@ -175,6 +232,8 @@ function Toolbar({ editorRef, onUpdate, state, updateState, applyInlineStyle, sh
                 const oldFs = state.printFontSize;
                 updateState({ printFontSize: newFs });
                 showToast('Изменен базовый размер.', () => updateState({ printFontSize: oldFs }));
+              } else {
+                updateState({ printFontSize: newFs });
               }
             }}
             className="w-8 text-center text-[11px] font-bold text-stone-700 bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-brand-blue/20 rounded py-0.5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -183,12 +242,14 @@ function Toolbar({ editorRef, onUpdate, state, updateState, applyInlineStyle, sh
           <button
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => {
-              let newFs = Math.min(100, (parseFloat(state.printFontSize) || 18) + 1);
+              let newFs = Math.min(100, getCurrentFs() + 1);
               const applied = applyInlineStyle('fs', newFs);
               if (!applied) {
                 const oldFs = state.printFontSize;
                 updateState({ printFontSize: newFs });
                 showToast('Изменен базовый размер.', () => updateState({ printFontSize: oldFs }));
+              } else {
+                updateState({ printFontSize: newFs });
               }
             }}
             className="w-5 h-6 flex items-center justify-center text-stone-500 hover:text-stone-900 transition-colors"

@@ -26,29 +26,6 @@ function SmartMenu({ editorRef, onClear, onUpdate }) {
     onUpdate();
   };
 
-  const toggleBold = () => {
-    const sel = window.getSelection();
-    if (!sel.rangeCount || sel.isCollapsed) return;
-    const range = sel.getRangeAt(0);
-    const closestSpan = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE 
-        ? range.commonAncestorContainer.closest('span') 
-        : range.commonAncestorContainer.parentElement?.closest('span');
-    
-    let isBold = false;
-    let currentSpan = closestSpan;
-    while (currentSpan && currentSpan.tagName === 'SPAN') {
-        if (currentSpan.dataset.bold === 'true') {
-            isBold = true;
-            break;
-        }
-        if (currentSpan.dataset.bold === 'false') {
-            isBold = false;
-            break;
-        }
-        currentSpan = currentSpan.parentElement.closest('span');
-    }
-    applyStyleToSelection(editorRef, 'bold', isBold ? 'false' : 'true', onUpdate);
-  };
 
   const applyStyle = (type, value) => {
     const sel = window.getSelection();
@@ -170,7 +147,7 @@ function SmartMenu({ editorRef, onClear, onUpdate }) {
   };
 
   return (
-    <div className="flex items-center gap-0.5 w-full">
+    <div className="flex items-center justify-between w-full">
       <div className="flex items-center gap-0.5 shrink-0">
         <Tooltip content="подлежащее" side="top">
           <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'solid')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs"><span className="border-b-2 border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
@@ -195,7 +172,7 @@ function SmartMenu({ editorRef, onClear, onUpdate }) {
         </Tooltip>
       </div>
       
-      <div className="w-px h-5 bg-stone-200 mx-0.5 shrink-0"></div>
+      <div className="w-px h-5 bg-stone-200 shrink-0"></div>
       
       <div className="flex items-center gap-0.5 shrink-0">
         <Tooltip content="приставка" side="top">
@@ -219,19 +196,13 @@ function SmartMenu({ editorRef, onClear, onUpdate }) {
         </Tooltip>
       </div>
 
-      <div className="w-px h-5 bg-stone-200 mx-0.5 shrink-0"></div>
+      <div className="w-px h-5 bg-stone-200 shrink-0"></div>
       
       <Tooltip content="Ударение" side="top">
         <button onMouseDown={(e) => e.preventDefault()} onClick={addAccent} className="w-6 h-6 shrink-0 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium">´</button>
       </Tooltip>
 
-      <div className="w-px h-5 bg-stone-200 ml-auto mr-0.5 shrink-0"></div>
-
-      <Tooltip content="Жирный" side="top">
-        <button onMouseDown={(e) => e.preventDefault()} onClick={toggleBold} className="w-6 h-6 shrink-0 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold font-serif text-sm">Ж</button>
-      </Tooltip>
-
-      <div className="w-px h-5 bg-stone-200 mx-0.5 shrink-0"></div>
+      <div className="w-px h-5 bg-stone-200 shrink-0"></div>
 
       <Tooltip content="Очистить форматирование" side="top">
         <button 
