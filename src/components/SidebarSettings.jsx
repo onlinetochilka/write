@@ -61,11 +61,9 @@ function SidebarSettings({ onOpenHelp }) {
       html: editorRef.current.innerHTML,
       lines: state.textLines
     };
-    
-    editorRef.current.innerHTML = '<div><br></div>';
-    handleInput();
+    applyStyleToSelection(editorRef, 'clear', null, handleInput);
 
-    showToast('Текст очищен', () => {
+    showToast('Форматирование очищено', () => {
       if (editorRef.current) {
         editorRef.current.innerHTML = savedState.html;
         handleInput();
@@ -160,7 +158,7 @@ function SidebarSettings({ onOpenHelp }) {
   return (
     <div className="relative flex flex-col lg:h-full lg:flex-shrink-0 z-10 w-full lg:w-[clamp(380px,27vw,450px)] lg:min-w-[380px] print:hidden">
       <EditorSync editorRef={editorRef} />
-      <aside className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 flex flex-col lg:h-full w-full relative z-[2] lg:overflow-hidden">
+      <aside className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 flex flex-col lg:h-full w-full relative z-[2] lg:overflow-visible">
         {/* Header */}
         <header className="flex items-center p-4 border-b border-stone-200/50">
           <img
@@ -231,24 +229,33 @@ function SidebarSettings({ onOpenHelp }) {
           </button>
         </div>
 
-        <div className={`flex-1 relative flex flex-col min-h-0 ${activeTab === 'text' ? 'lg:overflow-hidden' : 'lg:overflow-y-auto'}`}>
-          <div className="p-4 flex-1 flex flex-col min-h-0">
-            <div className={activeTab === 'text' ? 'flex-1 flex flex-col gap-5 min-h-0' : 'hidden'}>
+        {activeTab === 'text' && (
+          <div className="px-4 pt-4 pb-0 flex-shrink-0 z-20 relative">
+            <div className="bg-white rounded-xl border border-stone-200/50 shadow-sm p-3 flex flex-col gap-2">
+              <Toolbar 
+                editorRef={editorRef} 
+                onUpdate={handleInput} 
+                state={state}
+                updateState={handleUpdateState}
+                applyInlineStyle={applyInlineStyle}
+                showToast={showToast}
+              />
+              <SmartMenu 
+                editorRef={editorRef} 
+                onClear={handleClearText}
+                onUpdate={handleInput}
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 relative flex flex-col min-h-0 overflow-y-auto custom-scrollbar">
+          <div className={`flex-1 flex flex-col min-h-0 ${activeTab === 'text' ? 'p-4 pt-3' : 'p-4'}`}>
+            <div className={activeTab === 'text' ? 'flex-1 flex flex-col gap-5 min-h-[260px]' : 'hidden'}>
               {/* Text Editor Section */}
-              <section className="flex-1 flex flex-col min-h-0">
-                <div className="relative flex-shrink-0">
-                </div>
-                
-                <div className="border border-stone-200/50 bg-white rounded-xl shadow-sm relative flex flex-col mt-2 flex-1 min-h-0">
-                  <div className="bg-stone-50/95 backdrop-blur-sm p-3 flex flex-col gap-2 border-b border-stone-200/50 rounded-t-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex-shrink-0">
-                    <Toolbar 
-                      editorRef={editorRef} 
-                      onUpdate={handleInput} 
-                      onClear={handleClearText}
-                    />
-                    <SmartMenu editorRef={editorRef} />
-                  </div>
-                  <div className="p-3 flex-1 overflow-y-auto custom-scrollbar min-h-0 bg-[#FDFBF7]/80 backdrop-blur-sm rounded-b-xl border border-black/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus-within:ring-1 focus-within:ring-[#1D3557]/20 focus-within:border-[#1D3557]/30 transition-colors text-[#1D3557]">
+              <section className="flex-1 flex flex-col">
+                <div className="border border-stone-200/50 bg-[#FDFBF7]/80 rounded-xl shadow-sm relative flex flex-col flex-1 focus-within:ring-1 focus-within:ring-[#1D3557]/20 focus-within:border-[#1D3557]/30 transition-colors text-[#1D3557]">
+                  <div className="p-3 flex-1">
                     <div 
                       ref={editorRef}
                       className="min-h-[120px] outline-none whitespace-pre-wrap break-words" 
@@ -266,66 +273,6 @@ function SidebarSettings({ onOpenHelp }) {
               </div>
             </div>
             </section>
-
-            {/* Font and Mode Section */}
-            <div className="flex-shrink-0 grid grid-cols-2 gap-4">
-              <section>
-                <div className="flex items-center justify-between mb-2 h-4">
-                  <div className="text-[11px] font-bold text-stone-500 uppercase">Шрифт</div>
-                  
-                  <div className={`flex items-center justify-end gap-1.5 flex-1 min-w-0 ml-2 transition-opacity duration-200 ${state.printFont === 'ClassRoomCursive' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                    <input 
-                      type="range" 
-                      min="2" max="100" step="0.5"
-                      value={state.printFontSize} 
-                      onChange={(e) => {
-                        const newFs = parseFloat(e.target.value);
-                        const applied = applyInlineStyle('fs', newFs);
-                        if (!applied) {
-                          const oldFs = state.printFontSize;
-                          updateState({ printFontSize: newFs });
-                          showToast('Изменен базовый размер.', () => updateState({ printFontSize: oldFs }));
-                        }
-                      }}
-                      className="flex-1 min-w-0 accent-brand-blue h-1 bg-stone-200 rounded-lg appearance-none cursor-pointer"
-                    />
-                    <span className="text-[10px] text-stone-500 font-medium w-4 shrink-0 text-right leading-none">{state.printFontSize}</span>
-                  </div>
-                </div>
-                
-                <div className="flex gap-1 bg-stone-100/80 p-1 rounded-2xl">
-                    <button 
-                      onClick={() => {
-                        const newFont = 'ClassRoomCursive';
-                        const applied = applyInlineStyle('font', newFont);
-                        if (!applied) {
-                          const oldFont = state.printFont;
-                          updateState({ printFont: newFont });
-                          showToast('Изменен базовый шрифт.', () => updateState({ printFont: oldFont }));
-                        }
-                      }}
-                      className={`flex-1 flex flex-col items-center justify-center h-10 px-2 rounded-xl text-xs font-medium transition-all ${state.printFont === 'ClassRoomCursive' ? 'bg-white text-stone-900 shadow-sm ring-1 ring-black/5' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'}`}
-                    >
-                      Рукописный
-                    </button>
-                    <button 
-                      onClick={() => {
-                        const newFont = 'Bahnschrift';
-                        const applied = applyInlineStyle('font', newFont);
-                        if (!applied) {
-                          const oldFont = state.printFont;
-                          updateState({ printFont: newFont });
-                          showToast('Изменен базовый шрифт.', () => updateState({ printFont: oldFont }));
-                        }
-                      }}
-                      className={`flex-1 flex flex-col items-center justify-center h-10 px-2 rounded-xl text-xs font-medium transition-all ${state.printFont !== 'ClassRoomCursive' ? 'bg-white text-stone-900 shadow-sm ring-1 ring-black/5' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'}`}
-                    >
-                      Печатный
-                    </button>
-                </div>
-              </section>
-              <ModeSelector mode={state.mode} updateState={handleUpdateState} />
-            </div>
             </div>
 
             <div className={activeTab === 'list' ? 'space-y-5 flex flex-col' : 'hidden'}>

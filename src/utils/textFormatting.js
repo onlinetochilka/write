@@ -16,7 +16,7 @@ export const applyStyleToSelection = (editorRef, type, value, onUpdate) => {
       : range.commonAncestorContainer.parentElement?.closest('span');
 
   let currentSpan = closestSpan;
-  let inherited = { morph: null, ul: null, color: null, morphId: null, bold: null, font: null, fs: null, base: null, baseId: null };
+  let inherited = { morph: null, ul: null, color: null, bg: null, morphId: null, bold: null, font: null, fs: null, base: null, baseId: null };
   while (currentSpan && currentSpan.tagName === 'SPAN') {
       if (!inherited.morph && currentSpan.dataset.morph) {
           inherited.morph = currentSpan.dataset.morph;
@@ -28,6 +28,7 @@ export const applyStyleToSelection = (editorRef, type, value, onUpdate) => {
       }
       if (!inherited.ul && currentSpan.dataset.ul) inherited.ul = currentSpan.dataset.ul;
       if (!inherited.color && currentSpan.dataset.color) inherited.color = currentSpan.dataset.color;
+      if (!inherited.bg && currentSpan.dataset.bg) inherited.bg = currentSpan.dataset.bg;
       if (!inherited.bold && currentSpan.dataset.bold) inherited.bold = currentSpan.dataset.bold;
       if (!inherited.font && currentSpan.dataset.font) inherited.font = currentSpan.dataset.font;
       if (!inherited.fs && currentSpan.dataset.fs) inherited.fs = currentSpan.dataset.fs;
@@ -36,29 +37,39 @@ export const applyStyleToSelection = (editorRef, type, value, onUpdate) => {
 
   const targetSpan = document.createElement('span');
 
-  if (inherited.ul) targetSpan.dataset.ul = inherited.ul;
-  if (inherited.morph) {
-      targetSpan.dataset.morph = inherited.morph;
-      if (inherited.morphId) targetSpan.dataset.morphId = inherited.morphId;
+  if (type !== 'clear') {
+    if (inherited.ul) targetSpan.dataset.ul = inherited.ul;
+    if (inherited.morph) {
+        targetSpan.dataset.morph = inherited.morph;
+        if (inherited.morphId) targetSpan.dataset.morphId = inherited.morphId;
+    }
+    if (inherited.base) {
+        targetSpan.dataset.base = inherited.base;
+        if (inherited.baseId) targetSpan.dataset.baseId = inherited.baseId;
+    }
+    if (inherited.color) {
+        targetSpan.dataset.color = inherited.color;
+        targetSpan.style.color = inherited.color;
+    }
+    if (inherited.bg) {
+        targetSpan.dataset.bg = inherited.bg;
+        targetSpan.style.backgroundColor = inherited.bg;
+    }
+    if (inherited.bold && inherited.bold !== 'false') {
+        targetSpan.dataset.bold = inherited.bold;
+        targetSpan.style.fontWeight = 'bold';
+    }
+    if (inherited.font) targetSpan.dataset.font = inherited.font;
+    if (inherited.fs) targetSpan.dataset.fs = inherited.fs;
   }
-  if (inherited.base) {
-      targetSpan.dataset.base = inherited.base;
-      if (inherited.baseId) targetSpan.dataset.baseId = inherited.baseId;
-  }
-  if (inherited.color) {
-      targetSpan.dataset.color = inherited.color;
-      targetSpan.style.color = inherited.color;
-  }
-  if (inherited.bold && inherited.bold !== 'false') {
-      targetSpan.dataset.bold = inherited.bold;
-      targetSpan.style.fontWeight = 'bold';
-  }
-  if (inherited.font) targetSpan.dataset.font = inherited.font;
-  if (inherited.fs) targetSpan.dataset.fs = inherited.fs;
 
   if (type === 'color') {
     targetSpan.dataset.color = value;
     targetSpan.style.color = value;
+  }
+  if (type === 'bg') {
+    targetSpan.dataset.bg = value;
+    targetSpan.style.backgroundColor = value;
   }
   if (type === 'bold') {
     targetSpan.dataset.bold = value;
@@ -74,6 +85,10 @@ export const applyStyleToSelection = (editorRef, type, value, onUpdate) => {
         if (type === 'color') {
             span.dataset.color = value;
             span.style.color = value;
+        }
+        if (type === 'bg') {
+            span.dataset.bg = value;
+            span.style.backgroundColor = value;
         }
         if (type === 'bold') {
             span.dataset.bold = value;

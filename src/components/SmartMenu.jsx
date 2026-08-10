@@ -3,8 +3,9 @@ import { useStore } from '../Store';
 import { getTextLines } from '../utils/textParser';
 import { trackGoal } from '../utils/analytics';
 import { Tooltip } from './ui/Tooltip';
+import { applyStyleToSelection } from '../utils/textFormatting';
 
-function SmartMenu({ editorRef }) {
+function SmartMenu({ editorRef, onClear, onUpdate }) {
   const { updateState } = useStore(() => null);
 
   const addAccent = () => {
@@ -18,13 +19,35 @@ function SmartMenu({ editorRef }) {
     const textNode = document.createTextNode('\u0301');
     range.insertNode(textNode);
     range.setStartAfter(textNode);
-    range.collapse(true);
+    range.setEndAfter(textNode);
     sel.removeAllRanges();
     sel.addRange(range);
-    updateState({ 
-      textLines: getTextLines(editorRef.current),
-      editorHtml: editorRef.current.innerHTML
-    });
+    
+    onUpdate();
+  };
+
+  const toggleBold = () => {
+    const sel = window.getSelection();
+    if (!sel.rangeCount || sel.isCollapsed) return;
+    const range = sel.getRangeAt(0);
+    const closestSpan = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE 
+        ? range.commonAncestorContainer.closest('span') 
+        : range.commonAncestorContainer.parentElement?.closest('span');
+    
+    let isBold = false;
+    let currentSpan = closestSpan;
+    while (currentSpan && currentSpan.tagName === 'SPAN') {
+        if (currentSpan.dataset.bold === 'true') {
+            isBold = true;
+            break;
+        }
+        if (currentSpan.dataset.bold === 'false') {
+            isBold = false;
+            break;
+        }
+        currentSpan = currentSpan.parentElement.closest('span');
+    }
+    applyStyleToSelection(editorRef, 'bold', isBold ? 'false' : 'true', onUpdate);
   };
 
   const applyStyle = (type, value) => {
@@ -147,22 +170,22 @@ function SmartMenu({ editorRef }) {
   };
 
   return (
-    <div className="flex items-center gap-1">
-      <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-0.5 w-full">
+      <div className="flex items-center gap-0.5 shrink-0">
         <Tooltip content="подлежащее" side="top">
-          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'solid')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs"><span className="border-b-2 border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
+          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'solid')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs"><span className="border-b-2 border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
         </Tooltip>
         <Tooltip content="сказуемое" side="top">
-          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'double')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs"><span className="border-b-[3px] border-double border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
+          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'double')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs"><span className="border-b-[3px] border-double border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
         </Tooltip>
         <Tooltip content="дополнение" side="top">
-          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'dashed')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs"><span className="border-b-2 border-dashed border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
+          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'dashed')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs"><span className="border-b-2 border-dashed border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
         </Tooltip>
         <Tooltip content="определение" side="top">
-          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'wavy')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs"><span className="underline decoration-wavy underline-offset-2 decoration-[1.5px] pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
+          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'wavy')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs"><span className="underline decoration-wavy underline-offset-2 decoration-[1.5px] pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
         </Tooltip>
         <Tooltip content="обстоятельство" side="top">
-          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'dotdash')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors">
+          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'dotdash')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors">
             <svg width="16" height="1.5" viewBox="0 0 16 1.5" fill="currentColor" className="translate-y-[8px]">
               <rect x="0" y="0" width="5" height="1.5" />
               <rect x="7" y="0" width="2" height="1.5" />
@@ -172,23 +195,23 @@ function SmartMenu({ editorRef }) {
         </Tooltip>
       </div>
       
-      <div className="w-px h-5 bg-stone-200 mx-1"></div>
+      <div className="w-px h-5 bg-stone-200 mx-0.5 shrink-0"></div>
       
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-0.5 shrink-0">
         <Tooltip content="приставка" side="top">
-          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'prefix')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-medium font-serif text-sm">¬</button>
+          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'prefix')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-medium font-serif text-sm">¬</button>
         </Tooltip>
         <Tooltip content="корень" side="top">
-          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'root')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-medium font-serif text-sm">⌒</button>
+          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'root')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-medium font-serif text-sm">⌒</button>
         </Tooltip>
         <Tooltip content="суффикс" side="top">
-          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'suffix')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-medium font-serif text-sm">^</button>
+          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'suffix')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-medium font-serif text-sm">^</button>
         </Tooltip>
         <Tooltip content="окончание" side="top">
-          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'ending')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-medium font-serif text-sm">□</button>
+          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('morph', 'ending')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-medium font-serif text-sm">□</button>
         </Tooltip>
         <Tooltip content="основа" side="top">
-          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('base', 'toggle')} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors">
+          <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('base', 'toggle')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors">
             <svg width="14" height="6" viewBox="0 0 14 6" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="translate-y-[5px]">
               <path d="M1 1v4h12V1" />
             </svg>
@@ -196,9 +219,34 @@ function SmartMenu({ editorRef }) {
         </Tooltip>
       </div>
 
-      <div className="w-px h-5 bg-stone-200 mx-1 ml-auto"></div>
+      <div className="w-px h-5 bg-stone-200 mx-0.5 shrink-0"></div>
       
-      <button onMouseDown={(e) => e.preventDefault()} onClick={addAccent} className="w-7 h-7 flex items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium">´</button>
+      <Tooltip content="Ударение" side="top">
+        <button onMouseDown={(e) => e.preventDefault()} onClick={addAccent} className="w-6 h-6 shrink-0 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium">´</button>
+      </Tooltip>
+
+      <div className="w-px h-5 bg-stone-200 ml-auto mr-0.5 shrink-0"></div>
+
+      <Tooltip content="Жирный" side="top">
+        <button onMouseDown={(e) => e.preventDefault()} onClick={toggleBold} className="w-6 h-6 shrink-0 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold font-serif text-sm">Ж</button>
+      </Tooltip>
+
+      <div className="w-px h-5 bg-stone-200 mx-0.5 shrink-0"></div>
+
+      <Tooltip content="Очистить форматирование" side="top">
+        <button 
+          onMouseDown={(e) => e.preventDefault()} 
+          onClick={onClear} 
+          className="w-6 h-6 shrink-0 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </button>
+      </Tooltip>
     </div>
   );
 }

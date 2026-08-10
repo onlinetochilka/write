@@ -175,6 +175,7 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
   let currentX = initialX;
   let y = startY;
   const elements = [];
+  const bgElements = [];
   let k = 0;
   
   let activeBaseId = null;
@@ -251,6 +252,18 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
           }
           return { isDigit: false, text: part };
         });
+
+        if (chunkObj.bg) {
+          bgElements.push({
+            type: 'bg-rect',
+            key: `${kPfx}_bg${k++}`,
+            x: r(currentX),
+            y: r(yPos - fontSz * 0.65),
+            width: r(estWidth),
+            height: r(fontSz * 0.8),
+            fill: chunkObj.bg
+          });
+        }
 
         if (isCompatible) {
           activeTextElement.parts.push(...newParts);
@@ -342,7 +355,7 @@ function renderLineWithWrap(lineChunks, startX, endX, startY, H, fontSize, lineH
     }
     flushAcc(y);
   }
-  return { y, elements };
+  return { y, elements: [...bgElements, ...elements] };
 }
 
 function renderNormalLines(W, H, cfg, margin, gridType, textLines, fill, topOffset, printFont, printFontSize) {
@@ -434,6 +447,7 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
   const isCursive = printFont === 'ClassRoomCursive';
   
   const allElements = [];
+  const bgElements = [];
 
   textLines.forEach((lineData, lIdx) => {
     if (rowY > H) return;
@@ -511,6 +525,19 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
         }
 
         const chStr = ch;
+        
+        if (chunkObj.bg) {
+          bgElements.push({
+            type: 'bg-rect',
+            key: `mbg${lIdx}_${col}`,
+            x: cx - step / 2,
+            y: r(rowY - fontSize * 0.65),
+            width: r(step),
+            height: r(fontSize * 0.8),
+            fill: chunkObj.bg
+          });
+        }
+
         allElements.push({
           type: 'math-text',
           key: `mtxt${lIdx}_${col}`,
@@ -562,7 +589,7 @@ function renderMathLines(W, H, cfg, margin, gridType, textLines, fill, topOffset
     }
     rowY += lineH;
   });
-  return allElements;
+  return [...bgElements, ...allElements];
 }
 
 // ========================================================================= //
@@ -656,6 +683,8 @@ function renderDataElements(dataElements) {
       return <path key={el.key} d={el.d} stroke={el.stroke} strokeWidth={el.strokeWidth} fill={el.fill} />;
     } else if (el.type === 'rect') {
       return <rect key={el.key} x={el.x} y={el.y} width={el.width} height={el.height} stroke={el.stroke} strokeWidth={el.strokeWidth} fill={el.fill} />;
+    } else if (el.type === 'bg-rect') {
+      return <rect key={el.key} x={el.x} y={el.y} width={el.width} height={el.height} fill={el.fill} style={{ mixBlendMode: 'multiply' }} />;
     } else if (el.type === 'text') {
       return (
         <text key={el.key} x={el.x} y={el.y} fontSize={el.fontSize} fontWeight={el.fontWeight} dominantBaseline="alphabetic" xmlSpace="preserve" fill={el.fill} fontFamily={el.fontFamily}>

@@ -5,13 +5,14 @@ export function getTextLines(editorEl) {
   let currentLineChunks = [];
   let currentAlign = 'left';
 
-  function traverse(node, currentColor = null, currentUl = null, currentUlColor = null, currentMorph = 'none', currentMorphId = null, currentBold = false, currentFont = null, currentFs = null, currentBase = false, currentBaseId = null) {
+  function traverse(node, currentColor = null, currentBg = null, currentUl = null, currentUlColor = null, currentMorph = 'none', currentMorphId = null, currentBold = false, currentFont = null, currentFs = null, currentBase = false, currentBaseId = null) {
       if (node.nodeType === Node.TEXT_NODE) {
           const cleanText = node.textContent.replace(/\n/g, '');
           if (cleanText) {
               currentLineChunks.push({
                   text: cleanText,
                   color: currentColor,
+                  bg: currentBg,
                   ul: currentUl,
                   ulColor: currentUlColor !== null ? currentUlColor : currentColor,
                   morph: currentMorph || 'none',
@@ -46,6 +47,7 @@ export function getTextLines(editorEl) {
           }
 
           const newColor = node.dataset?.color || currentColor;
+          const newBg = node.dataset?.bg || currentBg;
           const newUl = node.dataset?.ul || currentUl;
           const newUlColor = node.dataset?.ulColor || currentUlColor;
           const newMorph = node.dataset?.morph || currentMorph;
@@ -58,7 +60,7 @@ export function getTextLines(editorEl) {
           const newBase = node.dataset?.base === 'true' || currentBase;
           const newBaseId = node.dataset?.baseId || currentBaseId;
 
-          node.childNodes.forEach(child => traverse(child, newColor, newUl, newUlColor, newMorph, newMorphId, newBold, newFont, newFs, newBase, newBaseId));
+          node.childNodes.forEach(child => traverse(child, newColor, newBg, newUl, newUlColor, newMorph, newMorphId, newBold, newFont, newFs, newBase, newBaseId));
 
           if (isBlock) {
               if (currentLineChunks.length > 0) {
@@ -72,7 +74,7 @@ export function getTextLines(editorEl) {
       }
   }
 
-  editorEl.childNodes.forEach(child => traverse(child, null, null, null, 'none', null, false, null, null, false, null));
+  editorEl.childNodes.forEach(child => traverse(child, null, null, null, null, 'none', null, false, null, null, false, null));
 
   if (currentLineChunks.length > 0) {
       lines.push({ chunks: currentLineChunks, align: currentAlign });
@@ -83,7 +85,7 @@ export function getTextLines(editorEl) {
       for (const chunk of lineData.chunks) {
           if (!chunk.text) continue;
           const last = merged[merged.length - 1];
-          if (last && last.color === chunk.color && last.ul === chunk.ul && last.ulColor === chunk.ulColor && last.morph === chunk.morph && last.morphId === chunk.morphId && last.bold === chunk.bold && last.font === chunk.font && last.fs === chunk.fs && last.base === chunk.base && last.baseId === chunk.baseId) {
+          if (last && last.color === chunk.color && last.bg === chunk.bg && last.ul === chunk.ul && last.ulColor === chunk.ulColor && last.morph === chunk.morph && last.morphId === chunk.morphId && last.bold === chunk.bold && last.font === chunk.font && last.fs === chunk.fs && last.base === chunk.base && last.baseId === chunk.baseId) {
               last.text += chunk.text;
           } else {
               merged.push({ ...chunk });
