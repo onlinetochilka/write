@@ -85,11 +85,18 @@ export function getTextLines(editorEl) {
       for (const chunk of lineData.chunks) {
           if (!chunk.text) continue;
           const last = merged[merged.length - 1];
-          if (last && last.color === chunk.color && last.bg === chunk.bg && last.ul === chunk.ul && last.ulColor === chunk.ulColor && last.morph === chunk.morph && last.morphId === chunk.morphId && last.bold === chunk.bold && last.font === chunk.font && last.fs === chunk.fs && last.base === chunk.base && last.baseId === chunk.baseId) {
-              last.text += chunk.text;
-          } else {
-              merged.push({ ...chunk });
+          
+          if (last) {
+              const isSameStyle = last.color === chunk.color && last.bg === chunk.bg && last.ul === chunk.ul && last.ulColor === chunk.ulColor && last.bold === chunk.bold && last.font === chunk.font && last.fs === chunk.fs;
+              const isSameMorph = last.morph === chunk.morph && (last.morphId === chunk.morphId || chunk.morph === 'ending' || chunk.morph === 'none');
+              const isSameBase = last.base === chunk.base;
+              
+              if (isSameStyle && isSameMorph && isSameBase) {
+                  last.text += chunk.text;
+                  continue;
+              }
           }
+          merged.push({ ...chunk });
       }
       return { chunks: merged, align: lineData.align };
   });
