@@ -324,6 +324,54 @@ const InsertOptions = () => {
                 />
               </div>
             </div>
+            
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-stone-100">
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Цвет текста</div>
+                <input 
+                  type="color" 
+                  value={selectedShape.textColor || '#000000'}
+                  className="w-8 h-8 p-0 border-0 rounded cursor-pointer overflow-hidden"
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, textColor: e.target.value } : s) })}
+                />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Размер шрифта</div>
+                <input 
+                  type="number" min="5" max="72"
+                  className="w-full text-sm p-2 border border-stone-200 rounded focus:border-brand-blue outline-none"
+                  value={selectedShape.fontSize || 12}
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, fontSize: parseFloat(e.target.value) || 12 } : s) })}
+                />
+              </div>
+            </div>
+            
+            <div className="pt-2 border-t border-stone-100 space-y-2">
+              <div>
+                <div className="text-[10px] font-bold text-stone-500 mb-2 uppercase">Выравнивание</div>
+                <div className="flex bg-stone-100 rounded-lg p-1">
+                  {['left', 'center', 'right'].map(align => (
+                    <button
+                      key={align}
+                      className={`flex-1 py-1 text-xs font-medium rounded-md transition-all ${(selectedShape.align || 'center') === align ? 'bg-white text-brand-blue shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+                      onClick={() => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, align } : s) })}
+                    >
+                      {align === 'left' ? 'Влево' : align === 'center' ? 'Центр' : 'Вправо'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <label className="flex items-center gap-2 text-xs text-stone-600 cursor-pointer">
+                <input 
+                  type="checkbox"
+                  checked={selectedShape.bold || false}
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, bold: e.target.checked } : s) })}
+                  className="rounded border-stone-300 text-brand-blue focus:ring-brand-blue"
+                />
+                Жирный текст
+              </label>
+            </div>
+
             <div className="grid grid-cols-2 gap-3 pt-2 border-t border-stone-100">
               <div>
                 <div className="text-[10px] font-bold text-stone-500 mb-1 uppercase">Ширина (мм)</div>
@@ -391,6 +439,15 @@ const InsertOptions = () => {
                   </button>
                 ))}
               </div>
+              <label className="flex items-center gap-2 text-xs text-stone-600 cursor-pointer mt-2">
+                <input 
+                  type="checkbox"
+                  checked={selectedShape.bold || false}
+                  onChange={(e) => updateState({ shapes: shapes.map(s => s.id === selectedShape.id ? { ...s, bold: e.target.checked } : s) })}
+                  className="rounded border-stone-300 text-brand-blue focus:ring-brand-blue"
+                />
+                Жирный текст
+              </label>
             </div>
             <div className="grid grid-cols-2 gap-3 pt-2 border-t border-stone-100">
               <div>

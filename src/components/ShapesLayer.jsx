@@ -800,9 +800,10 @@ const ShapesLayer = ({ W, H, svgRef }) => {
                         background: 'transparent',
                         border: 'none',
                         outline: 'none',
-                        textAlign: 'center',
-                        fontSize: '12px',
-                        color: '#000000',
+                        textAlign: shape.align || 'center',
+                        fontSize: `${shape.fontSize || 12}px`,
+                        fontWeight: shape.bold ? 'bold' : 'normal',
+                        color: shape.textColor || '#000000',
                         fontFamily: 'inherit'
                       }}
                     />
@@ -888,6 +889,7 @@ const ShapesLayer = ({ W, H, svgRef }) => {
                 width: '100%',
                 height: '100%',
                 fontSize: `${shape.fontSize || 12}px`,
+                fontWeight: shape.bold ? 'bold' : 'normal',
                 color: shape.textColor || '#000000',
                 textAlign: shape.align || 'left',
                 display: 'flex',

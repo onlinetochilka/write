@@ -77,6 +77,74 @@ function SidebarSettings({ onOpenHelp }) {
     document.execCommand('insertText', false, txt);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === ' ' || e.code === 'Space') {
+      const sel = window.getSelection();
+      if (!sel.rangeCount || !sel.isCollapsed) return;
+      const range = sel.getRangeAt(0);
+      const node = range.startContainer;
+      
+      let closestSpan = node.nodeType === Node.ELEMENT_NODE 
+        ? node.closest('span') 
+        : node.parentElement?.closest('span');
+
+      let syntaxSpan = null;
+      let currentSpan = closestSpan;
+      while (currentSpan && currentSpan.tagName === 'SPAN') {
+          if (currentSpan.dataset.morph || currentSpan.dataset.ul || currentSpan.dataset.base) {
+              syntaxSpan = currentSpan;
+          }
+          currentSpan = currentSpan.parentElement?.closest('span');
+      }
+
+      if (syntaxSpan) {
+        const checkRange = document.createRange();
+        checkRange.selectNodeContents(syntaxSpan);
+        try {
+            checkRange.setStart(range.endContainer, range.endOffset);
+        } catch (e) {
+            // Ignore if we can't set start
+        }
+        
+        if (checkRange.toString().length === 0) {
+            e.preventDefault();
+            
+            let inherited = { color: null, bg: null, bold: null, font: null, fs: null };
+            let current = closestSpan;
+            while (current && current.tagName === 'SPAN') {
+                if (!inherited.color && current.dataset.color) inherited.color = current.dataset.color;
+                if (!inherited.bg && current.dataset.bg) inherited.bg = current.dataset.bg;
+                if (!inherited.bold && current.dataset.bold) inherited.bold = current.dataset.bold;
+                if (!inherited.font && current.dataset.font) inherited.font = current.dataset.font;
+                if (!inherited.fs && current.dataset.fs) inherited.fs = current.dataset.fs;
+                current = current.parentElement?.closest('span');
+            }
+            
+            const newSpan = document.createElement('span');
+            newSpan.textContent = '\u200B';
+            
+            if (inherited.color) { newSpan.dataset.color = inherited.color; newSpan.style.color = inherited.color; }
+            if (inherited.bg) { newSpan.dataset.bg = inherited.bg; newSpan.style.backgroundColor = inherited.bg; }
+            if (inherited.bold && inherited.bold !== 'false') { newSpan.dataset.bold = inherited.bold; newSpan.style.fontWeight = 'bold'; }
+            if (inherited.font) { newSpan.dataset.font = inherited.font; newSpan.style.fontFamily = inherited.font === 'ClassRoomCursive' ? "'ClassRoomCursive', 'Propisi', cursive" : inherited.font; }
+            if (inherited.fs) { newSpan.dataset.fs = inherited.fs; }
+
+            syntaxSpan.parentNode.insertBefore(newSpan, syntaxSpan.nextSibling);
+            
+            const newRange = document.createRange();
+            newRange.setStart(newSpan.firstChild, 1);
+            newRange.setEnd(newSpan.firstChild, 1);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            
+            document.execCommand('insertText', false, ' ');
+            
+            setTimeout(handleInput, 0);
+        }
+      }
+    }
+  };
+
   const applyRestOfUpdateState = (finalState, newState) => {
     if (newState.grid !== undefined && editorRef.current) {
       const DEF_CURSIVE = 'Аа Бб Вв 1 2 3 4 5Пишу красиво и легко.С Точилкой всё сходится!';
@@ -264,6 +332,7 @@ function SidebarSettings({ onOpenHelp }) {
                       suppressContentEditableWarning
                       onPaste={handlePaste}
                       onInput={handleInput}
+                      onKeyDown={handleKeyDown}
                   style={{ 
                     fontFamily: state.printFont === 'ClassRoomCursive' ? "'ClassRoomCursive', 'Propisi', cursive" : state.printFont,
                     fontSize: state.printFont === 'ClassRoomCursive' ? '28px' : '18px',

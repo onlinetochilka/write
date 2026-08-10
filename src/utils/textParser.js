@@ -7,7 +7,7 @@ export function getTextLines(editorEl) {
 
   function traverse(node, currentColor = null, currentBg = null, currentUl = null, currentUlColor = null, currentMorph = 'none', currentMorphId = null, currentBold = false, currentFont = null, currentFs = null, currentBase = false, currentBaseId = null) {
       if (node.nodeType === Node.TEXT_NODE) {
-          const cleanText = node.textContent.replace(/\n/g, '');
+          const cleanText = node.textContent.replace(/\n/g, '').replace(/\u00A0/g, ' ').replace(/\u200B/g, '');
           if (cleanText) {
               currentLineChunks.push({
                   text: cleanText,
