@@ -5,6 +5,8 @@ import { PAPER_DIMS } from '../utils/constants';
 import { buildGridGroup } from '../utils/svgGrid';
 import { buildTextGroup } from '../utils/svgText';
 import ShapesLayer from './ShapesLayer';
+import WatermarkOverlay from './WatermarkOverlay';
+import { useAuth } from '../providers/AuthProvider';
 
 const MemoizedGrid = memo(({ W, H, grid, margin }) => {
   return buildGridGroup(W, H, grid, margin);
@@ -13,6 +15,30 @@ const MemoizedGrid = memo(({ W, H, grid, margin }) => {
 const ConnectedTextGroup = memo(({ W, H, grid, mode, mathMode, margin, printFont, printFontSize, fontsLoaded }) => {
   const { state: textLines } = useStore(s => s.textLines);
   return buildTextGroup(W, H, grid, mode, mathMode, margin, textLines, printFont, printFontSize);
+});
+
+// Conditionally renders watermark based on auth status
+const WatermarkLayer = memo(({ displayW, H }) => {
+  let showWatermark = true;
+  try {
+    const auth = useAuth();
+    showWatermark = auth.showWatermark;
+  } catch {
+    // Outside AuthProvider — show watermark by default
+  }
+  
+  if (!showWatermark) return null;
+  
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full"
+      style={{ pointerEvents: 'none', zIndex: 50 }}
+      viewBox={`0 0 ${displayW} ${H}`}
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <WatermarkOverlay W={displayW} H={H} />
+    </svg>
+  );
 });
 
 function PreviewSheet() {
@@ -168,6 +194,9 @@ function PreviewSheet() {
         >
           <ShapesLayer W={displayW} H={H} svgRef={svgRef} />
         </svg>
+
+        {/* Watermark overlay — shown for demo/free users, hidden for Pro */}
+        <WatermarkLayer displayW={displayW} H={H} />
       </div>
 
       {/* Zoom Controls */}

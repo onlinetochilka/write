@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Tooltip } from './ui/Tooltip';
 import { ColorPopover } from './ui/ColorPopover';
 import { Pencil, Highlighter } from 'lucide-react';
 import { trackGoal } from '../utils/analytics';
+import { useAuth } from '../providers/AuthProvider';
+import { ProBadge } from './ProBadge';
+import UpgradeModal from './UpgradeModal';
 
 import { applyStyleToSelection } from '../utils/textFormatting';
 
 function Toolbar({ editorRef, onUpdate, state, updateState, applyInlineStyle, showToast }) {
+  const auth = useAuth();
+  const [upgradeModal, setUpgradeModal] = useState({ open: false, feature: '' });
+
   const hexToRgba = (hex, alpha) => {
     if (!hex || !hex.startsWith('#')) return hex;
     const r = parseInt(hex.slice(1, 3), 16);
@@ -88,6 +94,7 @@ function Toolbar({ editorRef, onUpdate, state, updateState, applyInlineStyle, sh
   };
 
   return (
+    <>
     <div className="flex items-center justify-between border-b border-stone-200/50 pb-2 w-full">
       <div className="flex items-center gap-0.5 shrink-0">
         <ColorPopover
@@ -96,13 +103,25 @@ function Toolbar({ editorRef, onUpdate, state, updateState, applyInlineStyle, sh
           onSelect={(c) => applyStyle('color', c)}
           onClear={() => applyStyle('color', '')}
         />
-        <ColorPopover
-          icon={Highlighter}
-          tooltip="Маркер"
-          onSelect={(c) => applyStyle('bg', hexToRgba(c, 0.3))}
-          onClear={() => applyStyle('bg', '')}
-          clearLabel="Без заливки"
-        />
+        {(!auth.isPro && !auth.isDemo) ? (
+          <Tooltip content="Маркер (Pro)" side="top">
+            <button 
+              onClick={() => setUpgradeModal({ open: true, feature: 'Маркер' })}
+              className="relative w-6 h-6 flex items-center justify-center rounded-md bg-stone-50 text-stone-400"
+            >
+              <Highlighter className="w-4 h-4" />
+              <ProBadge variant="overlay" />
+            </button>
+          </Tooltip>
+        ) : (
+          <ColorPopover
+            icon={Highlighter}
+            tooltip="Маркер"
+            onSelect={(c) => applyStyle('bg', hexToRgba(c, 0.3))}
+            onClear={() => applyStyle('bg', '')}
+            clearLabel="Без заливки"
+          />
+        )}
       </div>
 
       <div className="w-px h-5 bg-stone-200 shrink-0"></div>
@@ -259,6 +278,12 @@ function Toolbar({ editorRef, onUpdate, state, updateState, applyInlineStyle, sh
         </div>
       </Tooltip>
     </div>
+    <UpgradeModal 
+      isOpen={upgradeModal.open} 
+      onClose={() => setUpgradeModal({ open: false, feature: '' })} 
+      featureName={upgradeModal.feature} 
+    />
+    </>
   );
 }
 

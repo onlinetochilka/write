@@ -4,9 +4,14 @@ import { getTextLines } from '../utils/textParser';
 import { trackGoal } from '../utils/analytics';
 import { Tooltip } from './ui/Tooltip';
 import { applyStyleToSelection } from '../utils/textFormatting';
+import { useAuth } from '../providers/AuthProvider';
+import { ProBadge } from './ProBadge';
+import UpgradeModal from './UpgradeModal';
 
 function SmartMenu({ editorRef, onClear, onUpdate }) {
   const { updateState } = useStore(() => null);
+  const auth = useAuth();
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   const addAccent = () => {
     trackGoal('accent_clicked');
@@ -146,8 +151,12 @@ function SmartMenu({ editorRef, onClear, onUpdate }) {
     });
   };
 
+  const isLocked = !auth.isPro && !auth.isDemo;
+
   return (
-    <div className="flex items-center justify-between w-full">
+    <>
+      <div className="relative w-full">
+        <div className={`flex items-center justify-between w-full ${isLocked ? 'opacity-50 pointer-events-none' : ''}`}>
       <div className="flex items-center gap-0.5 shrink-0">
         <Tooltip content="подлежащее" side="top">
           <button onMouseDown={(e) => e.preventDefault()} onClick={() => applyStyle('ul', 'solid')} className="w-6 h-6 flex items-center justify-center rounded-md bg-stone-100 text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors font-bold text-xs"><span className="border-b-2 border-current pb-0.5">&nbsp;&nbsp;&nbsp;</span></button>
@@ -218,7 +227,25 @@ function SmartMenu({ editorRef, onClear, onUpdate }) {
           </svg>
         </button>
       </Tooltip>
-    </div>
+        </div>
+        {isLocked && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <button
+              onClick={() => setShowUpgrade(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white shadow-sm border border-stone-200 text-sm font-medium text-stone-700 hover:bg-stone-50 transition-colors"
+            >
+              Разбор
+              <ProBadge variant="overlay" />
+            </button>
+          </div>
+        )}
+      </div>
+      <UpgradeModal 
+        isOpen={showUpgrade} 
+        onClose={() => setShowUpgrade(false)} 
+        featureName="Синтаксический и морфемный разбор" 
+      />
+    </>
   );
 }
 

@@ -1,8 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../../Store';
+import { useAuth } from '../../providers/AuthProvider';
+import { ProBadge } from '../ProBadge';
+import UpgradeModal from '../UpgradeModal';
 import { Tooltip } from '../ui/Tooltip';
 
 const InsertOptions = () => {
+  const auth = useAuth();
+  const [upgradeModal, setUpgradeModal] = useState({ open: false, feature: '' });
+
+  const PRO_SHAPES = new Set(['table', 'triangle', 'rectangle', 'coord_ray', 'coord_line', 'coord_plane', 'parallelogram', 'trapezoid', 'circle']);
+
+  const handleAddShape = (type, label) => {
+    if (!auth.isPro && !auth.isDemo && PRO_SHAPES.has(type)) {
+      setUpgradeModal({ open: true, feature: label });
+      return;
+    }
+    addShape(type);
+  };
+
   const { state, updateState } = useStore(s => ({
     shapes: s.shapes,
     selectedShapeId: s.selectedShapeId
@@ -1385,11 +1401,12 @@ const InsertOptions = () => {
           Картинка
         </button>
         <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700 col-span-2"
-          onClick={() => addShape('table')}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 transition-all text-xs col-span-2 relative ${!auth.isPro && !auth.isDemo ? 'bg-stone-50 text-stone-400' : 'bg-white hover:bg-stone-50 hover:border-brand-blue/30 text-stone-700'}`}
+          onClick={() => handleAddShape('table', 'Таблица')}
         >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/><line x1="15" y1="9" x2="15" y2="21"/></svg>
+          <svg className={`w-5 h-5 mb-1 ${!auth.isPro && !auth.isDemo ? 'text-stone-400' : 'text-stone-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/><line x1="15" y1="9" x2="15" y2="21"/></svg>
           Таблица
+          {!auth.isPro && !auth.isDemo && <ProBadge variant="overlay" />}
         </button>
       </div>
 
@@ -1410,71 +1427,85 @@ const InsertOptions = () => {
           Пунктир
         </button>
         <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('triangle')}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 transition-all text-xs relative ${!auth.isPro && !auth.isDemo ? 'bg-stone-50 text-stone-400' : 'bg-white hover:bg-stone-50 hover:border-brand-blue/30 text-stone-700'}`}
+          onClick={() => handleAddShape('triangle', 'Треугольник')}
         >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12,4 4,20 20,20"/></svg>
+          <svg className={`w-5 h-5 mb-1 ${!auth.isPro && !auth.isDemo ? 'text-stone-400' : 'text-stone-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12,4 4,20 20,20"/></svg>
           Треугольник
+          {!auth.isPro && !auth.isDemo && <ProBadge variant="overlay" />}
         </button>
         <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('rectangle')}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 transition-all text-xs relative ${!auth.isPro && !auth.isDemo ? 'bg-stone-50 text-stone-400' : 'bg-white hover:bg-stone-50 hover:border-brand-blue/30 text-stone-700'}`}
+          onClick={() => handleAddShape('rectangle', 'Прямоугольник')}
         >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="6" width="16" height="12"/></svg>
+          <svg className={`w-5 h-5 mb-1 ${!auth.isPro && !auth.isDemo ? 'text-stone-400' : 'text-stone-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="6" width="16" height="12"/></svg>
           Прямоугольник
+          {!auth.isPro && !auth.isDemo && <ProBadge variant="overlay" />}
         </button>
         <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('coord_ray')}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 transition-all text-xs relative ${!auth.isPro && !auth.isDemo ? 'bg-stone-50 text-stone-400' : 'bg-white hover:bg-stone-50 hover:border-brand-blue/30 text-stone-700'}`}
+          onClick={() => handleAddShape('coord_ray', 'Луч')}
         >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="4" y1="12" x2="20" y2="12" /><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none" /><polyline points="15,8 20,12 15,16" /></svg>
+          <svg className={`w-5 h-5 mb-1 ${!auth.isPro && !auth.isDemo ? 'text-stone-400' : 'text-stone-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="4" y1="12" x2="20" y2="12" /><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none" /><polyline points="15,8 20,12 15,16" /></svg>
           Луч
+          {!auth.isPro && !auth.isDemo && <ProBadge variant="overlay" />}
         </button>
         <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('coord_line')}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 transition-all text-xs relative ${!auth.isPro && !auth.isDemo ? 'bg-stone-50 text-stone-400' : 'bg-white hover:bg-stone-50 hover:border-brand-blue/30 text-stone-700'}`}
+          onClick={() => handleAddShape('coord_line', 'Коорд. прямая')}
         >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="2" y1="12" x2="20" y2="12" /><polyline points="15,8 20,12 15,16" /></svg>
+          <svg className={`w-5 h-5 mb-1 ${!auth.isPro && !auth.isDemo ? 'text-stone-400' : 'text-stone-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="2" y1="12" x2="20" y2="12" /><polyline points="15,8 20,12 15,16" /></svg>
           Коорд. прямая
+          {!auth.isPro && !auth.isDemo && <ProBadge variant="overlay" />}
         </button>
         <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('coord_plane')}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 transition-all text-xs relative ${!auth.isPro && !auth.isDemo ? 'bg-stone-50 text-stone-400' : 'bg-white hover:bg-stone-50 hover:border-brand-blue/30 text-stone-700'}`}
+          onClick={() => handleAddShape('coord_plane', 'Коорд. плоскость')}
         >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg className={`w-5 h-5 mb-1 ${!auth.isPro && !auth.isDemo ? 'text-stone-400' : 'text-stone-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <line x1="2" y1="12" x2="22" y2="12" />
             <polyline points="18,8 22,12 18,16" />
             <line x1="12" y1="22" x2="12" y2="2" />
             <polyline points="8,6 12,2 16,6" />
           </svg>
           Коорд. плоскость
+          {!auth.isPro && !auth.isDemo && <ProBadge variant="overlay" />}
         </button>
         <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('parallelogram')}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 transition-all text-xs relative ${!auth.isPro && !auth.isDemo ? 'bg-stone-50 text-stone-400' : 'bg-white hover:bg-stone-50 hover:border-brand-blue/30 text-stone-700'}`}
+          onClick={() => handleAddShape('parallelogram', 'Параллелограмм')}
         >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="6,18 10,6 22,6 18,18"/></svg>
+          <svg className={`w-5 h-5 mb-1 ${!auth.isPro && !auth.isDemo ? 'text-stone-400' : 'text-stone-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="6,18 10,6 22,6 18,18"/></svg>
           Параллелограмм
+          {!auth.isPro && !auth.isDemo && <ProBadge variant="overlay" />}
         </button>
         <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('trapezoid')}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 transition-all text-xs relative ${!auth.isPro && !auth.isDemo ? 'bg-stone-50 text-stone-400' : 'bg-white hover:bg-stone-50 hover:border-brand-blue/30 text-stone-700'}`}
+          onClick={() => handleAddShape('trapezoid', 'Трапеция')}
         >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="4,18 8,6 16,6 20,18"/></svg>
+          <svg className={`w-5 h-5 mb-1 ${!auth.isPro && !auth.isDemo ? 'text-stone-400' : 'text-stone-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="4,18 8,6 16,6 20,18"/></svg>
           Трапеция
+          {!auth.isPro && !auth.isDemo && <ProBadge variant="overlay" />}
         </button>
         <button 
-          className="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 hover:border-brand-blue/30 transition-all text-xs text-stone-700"
-          onClick={() => addShape('circle')}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 transition-all text-xs relative ${!auth.isPro && !auth.isDemo ? 'bg-stone-50 text-stone-400' : 'bg-white hover:bg-stone-50 hover:border-brand-blue/30 text-stone-700'}`}
+          onClick={() => handleAddShape('circle', 'Окружность')}
         >
-          <svg className="w-5 h-5 mb-1 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
+          <svg className={`w-5 h-5 mb-1 ${!auth.isPro && !auth.isDemo ? 'text-stone-400' : 'text-stone-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
           Окружность
+          {!auth.isPro && !auth.isDemo && <ProBadge variant="overlay" />}
         </button>
       </div>
       
       <div className="mt-4 p-3 bg-blue-50 text-brand-blue rounded-xl text-xs">
         Выберите фигуру, чтобы добавить её на лист. Вы можете перетаскивать выделенную фигуру мышкой.
       </div>
+
+      <UpgradeModal 
+        isOpen={upgradeModal.open} 
+        onClose={() => setUpgradeModal({ open: false, feature: '' })} 
+        featureName={upgradeModal.feature} 
+      />
     </section>
   );
 };

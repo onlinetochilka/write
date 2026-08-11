@@ -1,38 +1,43 @@
-import React, { useState } from 'react';
-import { StoreProvider } from './Store';
-import { UIProvider } from './providers/UIProvider';
-import Layout from './components/Layout';
-import SidebarSettings from './components/SidebarSettings';
-import PreviewSheet from './components/PreviewSheet';
-import HelpModal from './components/HelpModal';
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './providers/AuthProvider';
+import LandingPage from './pages/LandingPage';
+import EditorPage from './pages/EditorPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import AccountPage from './pages/AccountPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  const [isHelpOpen, setHelpOpen] = useState(false);
-  const [fontsLoaded, setFontsLoaded] = useState(false);
-
-  React.useEffect(() => {
-    document.fonts.ready.then(() => {
-      setFontsLoaded(true);
-    });
-  }, []);
-
-  if (!fontsLoaded) {
-    return <div className="min-h-screen flex items-center justify-center bg-stone-100">Загрузка шрифтов...</div>;
-  }
-
   return (
-    <UIProvider>
-      <StoreProvider>
-        <Layout>
-        <SidebarSettings onOpenHelp={() => setHelpOpen(true)} />
-        <PreviewSheet />
-      </Layout>
-      <HelpModal isOpen={isHelpOpen} onClose={() => setHelpOpen(false)} />
-      </StoreProvider>
-    </UIProvider>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        
+        {/* Protected routes */}
+        <Route path="/editor" element={
+          <ProtectedRoute><EditorPage /></ProtectedRoute>
+        } />
+        <Route path="/account" element={
+          <ProtectedRoute><AccountPage /></ProtectedRoute>
+        } />
+        <Route path="/payment/success" element={
+          <ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>
+        } />
+        
+        {/* Demo - no auth needed */}
+        <Route path="/demo" element={<EditorPage isDemo />} />
+        
+        {/* Auth pages */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        
+        {/* Fallback */}
+        <Route path="*" element={<LandingPage />} />
+      </Routes>
+    </AuthProvider>
   );
 }
 
 export default App;
-
-
