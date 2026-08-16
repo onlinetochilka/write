@@ -41,24 +41,27 @@ onRecordCreateRequest((e) => {
         e.record.set("write_status", "active");
         e.record.set("write_until", trialEnd.toISOString());
     }
-    
-    e.next();
 }, "users");
 
 // ============================================================
 // СОЗДАНИЕ ПЛАТЕЖА
 // ============================================================
 
-routerAdd("POST", "/api/write/payments/create", (c) => {
+routerAdd("POST", "/api/write/payments/create", (e) => {
     // Проверка авторизации
-    const auth = c.get("authRecord");
+    const auth = e.get("authRecord");
     if (!auth) {
         throw new ForbiddenError("Необходимо войти в аккаунт");
     }
 
-    const data = $apis.requestInfo(c).body;
-    const plan = data.plan;
-    const returnUrl = data.return_url || "https://write.tochilka.app/payment/success";
+    const body = new DynamicModel({
+        plan:       "",
+        return_url: ""
+    });
+    e.bindBody(body);
+
+    const plan = body.plan;
+    const returnUrl = body.return_url || "https://write.tochilka.app/payment/success";
 
     // Валидация плана
     if (!WRITE_PLANS[plan]) {
@@ -135,7 +138,7 @@ routerAdd("POST", "/api/write/payments/create", (c) => {
 
     const payment = JSON.parse(fullRes.raw);
 
-    return c.json(200, {
+    return e.json(200, {
         payment_id: payment.id,
         confirmation_url: payment.confirmation.confirmation_url,
     });
@@ -145,20 +148,26 @@ routerAdd("POST", "/api/write/payments/create", (c) => {
 // ВЕБХУК ЮKassa — уведомление об успешной оплате
 // ============================================================
 
-routerAdd("POST", "/api/write/payments/webhook", (c) => {
-    const data = $apis.requestInfo(c).body;
+routerAdd("POST", "/api/write/payments/webhook", (e) => {
+    const body = new DynamicModel({
+        event:  "",
+        object: ""   // вложенный объект — парсим вручную
+    });
+    e.bindBody(body);
 
     // Обрабатываем только успешные платежи
-    if (data.event !== "payment.succeeded") {
-        return c.json(200, { ignored: true });
+    if (body.event !== "payment.succeeded") {
+        return e.json(200, { ignored: true });
     }
 
-    const payment = data.object;
+    const payment = typeof body.object === "string"
+        ? JSON.parse(body.object)
+        : body.object;
     const meta = payment.metadata;
 
     // Проверяем, что это платёж для Тетради
     if (!meta || meta.product !== "write") {
-        return c.json(200, { ignored: true, reason: "not write product" });
+        return e.json(200, { ignored: true, reason: "not write product" });
     }
 
     const userId = meta.userId;
@@ -169,9 +178,9 @@ routerAdd("POST", "/api/write/payments/webhook", (c) => {
     let user;
     try {
         user = $app.findRecordById("users", userId);
-    } catch (e) {
+    } catch (err) {
         console.log("Write webhook: user not found:", userId);
-        return c.json(200, { error: "user not found" });
+        return e.json(200, { error: "user not found" });
     }
 
     // Определяем дату начала продления
@@ -199,15 +208,15 @@ routerAdd("POST", "/api/write/payments/webhook", (c) => {
     console.log("Write webhook: subscription updated for user", userId, 
         "plan:", plan, "until:", startDate.toISOString());
 
-    return c.json(200, { success: true });
+    return e.json(200, { success: true });
 });
 
 // ============================================================
 // ОТМЕНА ПОДПИСКИ
 // ============================================================
 
-routerAdd("POST", "/api/write/payments/cancel", (c) => {
-    const auth = c.get("authRecord");
+routerAdd("POST", "/api/write/payments/cancel", (e) => {
+    const auth = e.get("authRecord");
     if (!auth) {
         throw new ForbiddenError("Необходимо войти в аккаунт");
     }
@@ -218,5 +227,5 @@ routerAdd("POST", "/api/write/payments/cancel", (c) => {
 
     console.log("Write: subscription cancelled for user", auth.id);
 
-    return c.json(200, { success: true });
+    return e.json(200, { success: true });
 });
