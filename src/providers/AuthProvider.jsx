@@ -15,7 +15,7 @@ export function AuthProvider({ children, forceDemo = false }) {
   const [user, setUser] = useState(pb.authStore.record);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isDemo] = useState(forceDemo);
+  const [isDemo, setIsDemo] = useState(forceDemo);
 
   // Подписаться на изменения authStore
   useEffect(() => {
@@ -109,6 +109,7 @@ export function AuthProvider({ children, forceDemo = false }) {
       register,
       logout,
       clearError,
+      setDemo: setIsDemo,
 
       // Dev-хелпер: переключить Pro для тестирования (только локально)
       __devTogglePro: () => {
@@ -123,7 +124,7 @@ export function AuthProvider({ children, forceDemo = false }) {
         });
       },
     };
-  }, [user, isDemo, isLoading, error, login, register, logout, clearError]);
+  }, [user, isDemo, isLoading, error, login, register, logout, clearError, setIsDemo]);
 
   return (
     <AuthContext.Provider value={value}>

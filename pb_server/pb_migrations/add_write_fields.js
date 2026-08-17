@@ -15,10 +15,7 @@ migrate((app) => {
     // Статус подписки
     users.fields.add(new Field({
         name: "write_status",
-        type: "select",
-        options: {
-            values: ["active", "inactive"],
-        },
+        type: "text",
     }));
 
     // Дата окончания подписки

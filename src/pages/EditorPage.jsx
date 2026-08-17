@@ -15,28 +15,33 @@ import HelpModal from '../components/HelpModal';
 export default function EditorPage({ isDemo = false }) {
   const [isHelpOpen, setHelpOpen] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const { setDemo } = useAuth();
 
   React.useEffect(() => {
+    let mounted = true;
     document.fonts.ready.then(() => {
-      setFontsLoaded(true);
+      if (mounted) setFontsLoaded(true);
     });
+    return () => { mounted = false; };
   }, []);
+
+  React.useEffect(() => {
+    if (setDemo) setDemo(isDemo);
+  }, [isDemo, setDemo]);
 
   if (!fontsLoaded) {
     return <div className="min-h-screen flex items-center justify-center bg-stone-100">Загрузка шрифтов...</div>;
   }
 
   return (
-    <AuthProvider forceDemo={isDemo}>
-      <UIProvider>
-        <StoreProvider>
-          <Layout>
-            <SidebarSettings onOpenHelp={() => setHelpOpen(true)} />
-            <PreviewSheet />
-          </Layout>
-          <HelpModal isOpen={isHelpOpen} onClose={() => setHelpOpen(false)} />
-        </StoreProvider>
-      </UIProvider>
-    </AuthProvider>
+    <UIProvider>
+      <StoreProvider>
+        <Layout>
+          <SidebarSettings onOpenHelp={() => setHelpOpen(true)} />
+          <PreviewSheet />
+        </Layout>
+        <HelpModal isOpen={isHelpOpen} onClose={() => setHelpOpen(false)} />
+      </StoreProvider>
+    </UIProvider>
   );
 }

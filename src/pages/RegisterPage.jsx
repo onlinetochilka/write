@@ -92,11 +92,11 @@ export default function RegisterPage() {
                   id="reg-password"
                   type={showPw ? 'text' : 'password'}
                   required
-                  minLength={6}
+                  minLength={8}
                   value={password}
                   onChange={handlePasswordChange}
                   className="w-full h-12 px-4 pr-12 rounded-xl bg-white ring-1 ring-stone-200 text-stone-800 focus:ring-2 focus:ring-brand-blue/40 outline-none transition-shadow"
-                  placeholder="Минимум 6 символов"
+                  placeholder="Минимум 8 символов"
                 />
                 <button
                   type="button"

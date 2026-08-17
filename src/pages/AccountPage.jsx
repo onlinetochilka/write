@@ -7,27 +7,32 @@ export default function AccountPage() {
   const { user, isPro, logout } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   
   const sub = getSubscriptionInfo(user);
 
   const handleSubscribe = async (planKey) => {
     try {
+      setIsLoading(true);
       setError(null);
       const { confirmation_url } = await createSubscription(planKey);
       window.location.href = confirmation_url;
     } catch (err) {
       setError(err.message || 'Ошибка при создании подписки');
+      setIsLoading(false);
     }
   };
 
   const handleCancel = async () => {
     if (window.confirm('Вы уверены, что хотите отменить подписку?')) {
       try {
+        setIsLoading(true);
         setError(null);
         await cancelSubscription();
         window.location.reload(); // Reload user data
       } catch (err) {
         setError(err.message || 'Ошибка при отмене подписки');
+        setIsLoading(false);
       }
     }
   };
@@ -99,7 +104,11 @@ export default function AccountPage() {
                     <div className="font-semibold text-stone-800">199 ₽ / месяц</div>
                     <div className="text-xs text-stone-500">Ежемесячная оплата</div>
                   </div>
-                  <button onClick={() => handleSubscribe('monthly')} className="px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-[#005270] transition-colors">
+                  <button 
+                    onClick={() => handleSubscribe('monthly')} 
+                    disabled={isLoading}
+                    className="px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-[#005270] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     Выбрать
                   </button>
                 </div>
@@ -111,7 +120,11 @@ export default function AccountPage() {
                     <div className="font-semibold text-stone-800">1788 ₽ / год</div>
                     <div className="text-xs text-brand-blue font-medium">149 ₽ в месяц</div>
                   </div>
-                  <button onClick={() => handleSubscribe('yearly')} className="px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-[#005270] transition-colors z-10">
+                  <button 
+                    onClick={() => handleSubscribe('yearly')} 
+                    disabled={isLoading}
+                    className="px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-[#005270] transition-colors z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     Выбрать
                   </button>
                 </div>
@@ -120,7 +133,13 @@ export default function AccountPage() {
               <div className="text-sm text-stone-600">
                 <div>Следующее списание: <span className="font-medium">{sub.until?.toLocaleDateString('ru-RU')}</span></div>
                 {sub.daysLeft && <div className="text-xs text-stone-500 mt-1">Осталось дней: {sub.daysLeft}</div>}
-                <button onClick={handleCancel} className="mt-4 text-red-500 hover:underline text-xs">Отменить подписку</button>
+                <button 
+                  onClick={handleCancel} 
+                  disabled={isLoading}
+                  className="mt-4 text-red-500 hover:underline text-xs disabled:opacity-50 disabled:no-underline"
+                >
+                  Отменить подписку
+                </button>
               </div>
             )}
           </div>

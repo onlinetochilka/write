@@ -48,21 +48,43 @@ export default function LandingPage() {
         html { scroll-behavior: smooth; }
       `}</style>
 
+      {/* HEADER */}
+      <header className="absolute top-0 left-0 right-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-24">
+            <div className="flex items-center gap-3">
+              <img src="https://raw.githubusercontent.com/onlinetochilka/theme/main/tochilka-logo.svg" alt="Точилка лого" className="h-8" />
+              <span className="font-bold text-xl text-slate-900 tracking-tight">«Точилка». Идеальная тетрадь</span>
+            </div>
+            
+            <nav className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-slate-600 hover:text-slate-900 font-medium">Возможности</a>
+              <a href="#pricing" className="text-slate-600 hover:text-slate-900 font-medium">Тарифы</a>
+              <a href="#faq" className="text-slate-600 hover:text-slate-900 font-medium">Вопросы</a>
+            </nav>
+            
+            <div>
+              <Link to="/login" className="px-6 py-2.5 bg-[#1C1C1E] text-white rounded-xl font-medium hover:bg-black transition-colors">
+                Войти
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
       {/* SECTION 1: HERO */}
-      <section className="bg-[#EDF2F7] relative pt-20 pb-28 lg:pt-32 lg:pb-40 overflow-hidden">
-        {/* Abstract background shapes */}
-        <div className="absolute top-0 right-0 -mr-40 -mt-40 w-96 h-96 rounded-full bg-[#006584]/5 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 -ml-40 -mb-40 w-96 h-96 rounded-full bg-[#B71234]/5 blur-3xl"></div>
-        
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
+      <section className="bg-[#FAFAFA] relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
             <div className="lg:w-1/2 flex flex-col items-start text-left">
-              <div className="flex items-center gap-3 mb-8">
-                <img src="https://raw.githubusercontent.com/onlinetochilka/theme/main/tochilka-logo.svg" alt="Точилка лого" className="h-10" />
-                <span className="text-sm font-semibold text-slate-500 uppercase tracking-widest border-l-2 border-slate-300 pl-3">от экосистемы Точилка</span>
+              <div className="inline-flex items-center gap-2 bg-[#1B577A] text-white px-4 py-1.5 rounded-full text-sm font-medium mb-8">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                от экосистемы Точилка
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-6">
+              <h1 className="text-5xl sm:text-6xl lg:text-[64px] font-extrabold text-slate-900 leading-[1.1] mb-6 tracking-tight">
                 Идеальная тетрадь — <br />
                 <span className="text-[#006584]">собирайте учебные листы за минуты</span>
               </h1>
@@ -72,53 +94,47 @@ export default function LandingPage() {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-10 w-full sm:w-auto">
-                <Link to="/demo" className="px-8 py-4 bg-[#B71234] text-white rounded-2xl font-semibold text-lg hover:bg-[#9a0f2b] transition-all text-center shadow-lg shadow-[#B71234]/20 hover:-translate-y-1">
-                  Попробовать бесплатно
+                <Link to="/register" className="px-8 py-4 bg-[#1C1C1E] text-white rounded-xl font-medium text-lg hover:bg-black transition-colors flex items-center justify-center gap-2 group">
+                  Создать аккаунт
+                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                 </Link>
-                <a href="#pricing" className="px-8 py-4 bg-white text-slate-700 rounded-2xl font-semibold text-lg hover:bg-slate-50 transition-all text-center shadow-sm hover:shadow-md hover:-translate-y-1 border border-slate-200">
-                  Посмотреть тарифы
-                </a>
-              </div>
-              
-              <div className="flex items-center gap-3 text-sm text-slate-600 font-medium bg-white/60 backdrop-blur-sm py-2.5 px-5 rounded-full border border-slate-200/60 shadow-sm">
-                <div className="flex -space-x-2">
-                  <div className="w-6 h-6 rounded-full bg-green-500 border-2 border-white flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
-                  </div>
-                </div>
-                Уже создано 2 500+ листов преподавателями
+                <Link to="/demo" className="px-8 py-4 bg-white text-slate-700 rounded-xl font-medium text-lg hover:bg-slate-50 transition-colors border border-slate-200 text-center">
+                  Демо без регистрации
+                </Link>
               </div>
             </div>
             
-            <div className="lg:w-1/2 w-full max-w-lg relative">
-              <div className="bg-[#FDFBF7] rounded-3xl shadow-2xl p-10 aspect-[3/4] relative overflow-hidden border border-slate-200 transform rotate-1 hover:rotate-0 transition-transform duration-500 ease-out">
-                {/* Spiral binding illusion */}
-                <div className="absolute top-0 bottom-0 left-4 w-4 flex flex-col justify-evenly">
-                  {[...Array(12)].map((_, i) => (
-                    <div key={i} className="w-8 h-2 bg-slate-300 rounded-full shadow-sm -ml-6"></div>
-                  ))}
-                </div>
-                
-                <div className="pl-6 pt-8 w-full h-full flex flex-col space-y-14 relative z-10">
-                  <div className="relative h-10 w-full border-b-[1.5px] border-transparent">
-                    <div className="absolute bottom-0 left-0 h-[1.5px] bg-[#006584]/30 w-0 animate-line-1"></div>
-                    <div className="absolute bottom-2 left-4 font-serif italic text-4xl text-slate-700 animate-text-1">Аа</div>
+            <div className="lg:w-1/2 w-full flex justify-center lg:justify-end relative">
+              <div className="w-full max-w-lg">
+                <div className="bg-[#FDFBF7] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-10 aspect-[3/4] relative overflow-hidden border border-slate-200">
+                  {/* Spiral binding illusion */}
+                  <div className="absolute top-0 bottom-0 left-4 w-4 flex flex-col justify-evenly">
+                    {[...Array(12)].map((_, i) => (
+                      <div key={i} className="w-8 h-2 bg-slate-300 rounded-full shadow-sm -ml-6"></div>
+                    ))}
                   </div>
-                  <div className="relative h-10 w-full border-b-[1.5px] border-transparent">
-                    <div className="absolute bottom-0 left-0 h-[1.5px] bg-[#006584]/30 w-0 animate-line-2"></div>
-                    <div className="absolute bottom-2 left-24 font-serif italic text-4xl text-slate-700 animate-text-2">Бб</div>
-                  </div>
-                  <div className="relative h-10 w-full border-b-[1.5px] border-transparent">
-                    <div className="absolute bottom-0 left-0 h-[1.5px] bg-[#006584]/30 w-0 animate-line-3"></div>
-                    <div className="absolute bottom-2 left-44 font-serif italic text-4xl text-slate-700 animate-text-3">Вв</div>
-                  </div>
-                  <div className="absolute bottom-10 right-6 opacity-20">
-                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#006584" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
-                      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
-                      <path d="M2 2l7.586 7.586"></path>
-                      <circle cx="11" cy="11" r="2"></circle>
-                    </svg>
+                  
+                  <div className="pl-6 pt-8 w-full h-full flex flex-col space-y-14 relative z-10">
+                    <div className="relative h-10 w-full border-b-[1.5px] border-transparent">
+                      <div className="absolute bottom-0 left-0 h-[1.5px] bg-[#006584]/30 w-0 animate-line-1"></div>
+                      <div className="absolute bottom-2 left-4 font-serif italic text-4xl text-slate-700 animate-text-1">Аа</div>
+                    </div>
+                    <div className="relative h-10 w-full border-b-[1.5px] border-transparent">
+                      <div className="absolute bottom-0 left-0 h-[1.5px] bg-[#006584]/30 w-0 animate-line-2"></div>
+                      <div className="absolute bottom-2 left-24 font-serif italic text-4xl text-slate-700 animate-text-2">Бб</div>
+                    </div>
+                    <div className="relative h-10 w-full border-b-[1.5px] border-transparent">
+                      <div className="absolute bottom-0 left-0 h-[1.5px] bg-[#006584]/30 w-0 animate-line-3"></div>
+                      <div className="absolute bottom-2 left-44 font-serif italic text-4xl text-slate-700 animate-text-3">Вв</div>
+                    </div>
+                    <div className="absolute bottom-10 right-6 opacity-20">
+                      <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#006584" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                        <path d="M2 2l7.586 7.586"></path>
+                        <circle cx="11" cy="11" r="2"></circle>
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </div>
